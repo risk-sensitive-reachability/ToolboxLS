@@ -1,7 +1,7 @@
-function [ ydot, stepBound ] = termReinit(t, y, schemeData)
+function [ ydot, stepBound, schemeData ] = termReinit(t, y, schemeData)
 % termReinit: a Godunov solver for the reinitialization HJ PDE.
 %
-% [ ydot, stepBound ] = termReinit(t, y, schemeData)
+% [ ydot, stepBound, schemeData ] = termReinit(t, y, schemeData)
 %
 % Computes a Godunov approximation to motion by the reinitialization
 %   equation.  While the reinitialization equation is a general nonlinear HJ
@@ -30,6 +30,7 @@ function [ ydot, stepBound ] = termReinit(t, y, schemeData)
 %
 %   ydot	 Change in the data array, in vector form.
 %   stepBound	 CFL bound on timestep for stability.
+%   schemeData   The same as the input argument (unmodified).
 %
 % schemeData is a structure containing data specific to this type of 
 %   term approximation.  For this function it contains the field(s)
@@ -41,6 +42,11 @@ function [ ydot, stepBound ] = termReinit(t, y, schemeData)
 %                (used to determine on which side of surface node should lie)
 %
 % It may contain addition fields at the user's discretion.
+%
+% For evolving vector level sets, y may be a cell vector.  If y is a cell
+%   vector, schemeData may be a cell vector of equal length.  In this case
+%   all the elements of y (and schemeData if necessary) are ignored except
+%   the first.
 %
 % In the notation of OF text,
 %
@@ -58,23 +64,36 @@ function [ ydot, stepBound ] = termReinit(t, y, schemeData)
 %
 % Ian Mitchell 5/27/03
 % Calling parameters significantly modified, Ian Mitchell 2/13/04.
+% Updated to handle vector level sets.  Ian Mitchell 11/23/04.
 
   %---------------------------------------------------------------------------
-  checkStructureFields(schemeData, 'grid', 'derivFunc', 'initial');
+  % For vector level sets, ignore all the other elements.
+  if(iscell(schemeData))
+    thisSchemeData = schemeData{1};
+  else
+    thisSchemeData = schemeData;
+  end
+
+  checkStructureFields(thisSchemeData, 'grid', 'derivFunc', 'initial');
+
+  grid = thisSchemeData.grid;
 
   %---------------------------------------------------------------------------
-  grid = schemeData.grid;
-  data = reshape(y, grid.shape);
+  if(iscell(y))
+    data = reshape(y{1}, grid.shape);    
+  else
+    data = reshape(y, grid.shape);
+  end
 
   %---------------------------------------------------------------------------
   % Sign function (smeared) identifies on which side of surface each node lies.
-  S = smearedSign(grid, schemeData.initial);
+  S = smearedSign(grid, thisSchemeData.initial);
 
   %---------------------------------------------------------------------------
   % Compute Godunov derivative approximation for each dimension.
   deriv = cell(grid.dim, 1);
   for i = 1 : grid.dim
-    [ derivL, derivR ] = feval(schemeData.derivFunc, grid, data, i);
+    [ derivL, derivR ] = feval(thisSchemeData.derivFunc, grid, data, i);
 
     % For Gudunov's method, check characteristic directions
     %   according to left and right derivative approximations.
@@ -105,7 +124,6 @@ function [ ydot, stepBound ] = termReinit(t, y, schemeData)
     
     deriv{i} = derivL .* flowR + derivR .* flowL;
   end
-
 
   %---------------------------------------------------------------------------
   % Compute magnitude of gradient.

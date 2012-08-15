@@ -45,7 +45,7 @@ if(nargin < 3)
   width = 1;
 end
 
-if((width < 0) || (width > size(dataIn, 1)))
+if((width < 0) || (width > size(dataIn, dim)))
   error('Illegal width parameter');
 end
 

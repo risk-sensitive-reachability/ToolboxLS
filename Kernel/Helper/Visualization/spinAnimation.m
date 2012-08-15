@@ -40,9 +40,9 @@ function spinAnimation(fig, filename, compress)
 % Ian Mitchell, 4/8/03
 
 % Some parameters.
-fixElevation = 1;               % Other option: some vertical motion too.
+fixElevation = 0;               % Other option: some vertical motion too.
 deleteLabels = 1;               % Labels tend to float around and look bad.
-frames = 180;
+frames = 120;
 qualityValue = 90;		% Even 100 gets significant compression.
 
 % Turn off stuff we don't want -- animations are typically too busy looking.
@@ -61,7 +61,7 @@ box on
 % Set up the view that takes up the largest part of the figure window
 %   and freeze that view angle.  Otherwise the figure will appear to
 %   zoom in and out as it rotates.
-view(45, 45);
+view(45, 35);
 drawnow;
 camva('manual');
 
@@ -69,9 +69,9 @@ camva('manual');
 az = linspace(0, 360, frames);
 az = az([ round(frames/12) : end-1, 1 : round(frames/12) ]);
 if(fixElevation)
-  el = 30 * ones(size(az));
+  el = 15 * ones(size(az));
 else
-  el = 30 + 20 * sin(az * 2 * pi / 360);
+  el = 15 - 20 * sin(az * 2 * pi / 360);
 end
 
 % Create the avi file (choose a smaller qualityValue to get smaller files).

@@ -1,7 +1,7 @@
 function [ data, g, data0 ] = convectionDemo(flowType, accuracy, displayType)
 % convectionDemo: demonstrate a simple convective flow field.
 %
-% [ data, g, data0 ] = convectionDemo(flowType, accuracy, displayType)
+%   [ data, g, data0 ] = convectionDemo(flowType, accuracy, displayType)
 %  
 % This function was originally designed as a script file, so most of the
 %   options can only be modified in the file.

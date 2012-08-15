@@ -53,7 +53,6 @@ function [ diss, stepBound ] = ...
 %   partialFunc	  \alpha^i (dimension i is an argument to partialFunc).
 %   diss	  all the terms in \hat H except the H term.
 
-
 % Copyright 2004 Ian M. Mitchell (mitchell@cs.ubc.ca).
 % This software is used, copied and distributed under the licensing 
 %   agreement contained in the file LICENSE in the top directory of 

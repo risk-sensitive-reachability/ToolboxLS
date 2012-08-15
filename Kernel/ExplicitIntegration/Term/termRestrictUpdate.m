@@ -1,7 +1,7 @@
-function [ ydot, stepBound ] = termRestrictSign(t, y, schemeData)
-% termRestrictSign: restrict the sign of a term to be positive or negative.
+function [ ydot, stepBound, schemeData ] = termRestrictUpdate(t, y, schemeData)
+% termRestrictUpdate: restrict the sign of a term to be positive or negative.
 %
-% [ ydot, stepBound ] = termRestrictSign(t, y, schemeData)
+% [ ydot, stepBound, schemeData ] = termRestrictUpdate(t, y, schemeData)
 %
 % Given some other HJ term approximation, this function either restricts
 %   the sign of that update to be either:
@@ -18,6 +18,7 @@ function [ ydot, stepBound ] = termRestrictSign(t, y, schemeData)
 %
 %   ydot	 Change in the data array, in vector form.
 %   stepBound	 CFL bound on timestep for stability.
+%   schemeData   A structure (see below).
 %
 % schemeData is a structure containing data specific to this type of 
 %   term approximation.  For this function it contains the field(s)
@@ -26,9 +27,23 @@ function [ ydot, stepBound ] = termRestrictSign(t, y, schemeData)
 %                  calculate the unrestricted HJ term.
 %   .innerData   schemeData structure to pass to innerFunc.
 %   .positive    Boolean, true if update must be positive (nonnegative)
-%                  (optional, default = 1)
+%                  (optional, default = 1).
 %
 % It may contain addition fields at the user's discretion.
+%
+% While termRestrictUpdate will not change the schemeData structure,
+%   the schemeData.innerData component may be changed during the call
+%   to the schemeData.innerFunc function handle.
+%
+% For evolving vector level sets, y may be a cell vector.  In this case
+%   the entire y cell vector is passed unchanged in the call to the 
+%   schemeData.innerFunc function handle.
+%
+% If y is a cell vector, schemeData may be a cell vector of equal length.  
+%   In this case, schemeData{1} contains the fields listed above.  In the
+%   call to schemeData{1}.innerFunc, the schemeData cell vector is passed
+%   unchanged except that the element schemeData{1} is replaced with 
+%   the contents of the schemeData{1}.innerData field.
 
 % Copyright 2004 Ian M. Mitchell (mitchell@cs.ubc.ca).
 % This software is used, copied and distributed under the licensing 
@@ -36,22 +51,47 @@ function [ ydot, stepBound ] = termRestrictSign(t, y, schemeData)
 %   the distribution.
 %
 % Ian Mitchell, 3/26/04
+% Updated to handle vector level sets.  Ian Mitchell 11/23/04.
 
   %---------------------------------------------------------------------------
-  checkStructureFields(schemeData, 'innerFunc', 'innerData');
-
-  %---------------------------------------------------------------------------
-  % Default to positive (nonnegative) update restriction.
-  if(isfield(schemeData, 'positive'))
-    positive = schemeData.positive;
+  % For vector level sets, get the first element.
+  if(iscell(schemeData))
+    thisSchemeData = schemeData{1};
   else
-    positive = 1;
+    thisSchemeData = schemeData;
+  end
+
+  checkStructureFields(thisSchemeData, 'innerFunc', 'innerData');
+
+  %---------------------------------------------------------------------------
+  % Extract the appropriate inner data structure.
+  if(iscell(schemeData))
+    innerData = schemeData;
+    innerData{1} = schemeData{1}.innerData;
+  else
+    innerData = schemeData.innerData;
   end
 
   %---------------------------------------------------------------------------
   % Get the unrestricted update.
-  [ unRestricted, stepBound ] = ...
-                      feval(schemeData.innerFunc, t, y, schemeData.innerData);
+  [ unRestricted, stepBound, innerData ] = ...
+                              feval(thisSchemeData.innerFunc, t, y, innerData);
+
+  %---------------------------------------------------------------------------
+  % Store any modifications of the inner data structure.
+  if(iscell(schemeData))
+    schemeData{1}.innerData = innerData{1};
+  else
+    schemeData.innerData = innerData;
+  end
+
+  %---------------------------------------------------------------------------
+  % Default to positive (nonnegative) update restriction.
+  if(isfield(thisSchemeData, 'positive'))
+    positive = thisSchemeData.positive;
+  else
+    positive = 1;
+  end
 
   %---------------------------------------------------------------------------
   % Restrict the update (stepBound is returned unchanged).  

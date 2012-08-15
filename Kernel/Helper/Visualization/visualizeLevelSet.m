@@ -6,6 +6,11 @@ function h = visualizeLevelSet(g, data, displayType, level, titleStr)
 % Displays a variety of level set visualizations in dimensions 1 to 3.
 %   The current figure and axis is used.
 %
+% A warning will be generated if the requested level set is missing.
+%   For those display types that do not plot a level set
+%   (such as a surf plot in 2D), the warning can be disabled by 
+%   setting parameter level to be the empty vector [].
+%
 % Parameters:
 %   g   	 Grid structure.
 %   data         Array storing the implicit surface function.
@@ -49,8 +54,10 @@ function h = visualizeLevelSet(g, data, displayType, level, titleStr)
 
   l = [ level level ];
 
-  if((all(data(:) < level)) | (all(data(:) > level)))
-    warning('No implicitly defined surface exists');
+  if(~isempty(level))
+    if((all(data(:) < level)) | (all(data(:) > level)))
+      warning('No implicitly defined surface exists');
+    end
   end
   
 %---------------------------------------------------------------------------

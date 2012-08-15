@@ -9,13 +9,13 @@ function maxA = cellMatrixMax(A, takeAbs)
 %   value over the spatial array (maximized independently in each element).
 %
 % parameters:
-%   A		spatially varying matrix stored as a cell matrix
-%   takeAbs	boolean, return max(abs(A{i,j})) instead of max(A{i,j})
-%		  (optional, defaults to 0)
+%   A		Spatially varying matrix stored as a cell matrix.
+%   takeAbs	Boolean, return max(abs(A{i,j})) instead of max(A{i,j})
+%		  (optional, defaults to 0).
 %
-%   maxA	regular matrix containing the maximum entries
+%   maxA	Regular matrix containing the maximum entries.
 %
-% so A(i,j) = max(A{i,j}) or max(abs(A{i,j}))
+% so maxA(i,j) = max(A{i,j}) or max(abs(A{i,j})).
 
 % Copyright 2004 Ian M. Mitchell (mitchell@cs.ubc.ca).
 % This software is used, copied and distributed under the licensing 

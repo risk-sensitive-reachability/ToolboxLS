@@ -53,7 +53,7 @@ function [ t, y, schemeData ] = ...
 %   integration, and the version of schemeData at tf is returned in this
 %   output argument.
 
-% Copyright 2004 Ian M. Mitchell (mitchell@cs.ubc.ca).
+% Copyright 2005 Ian M. Mitchell (mitchell@cs.ubc.ca).
 % This software is used, copied and distributed under the licensing 
 %   agreement contained in the file LICENSE in the top directory of 
 %   the distribution.
@@ -61,6 +61,8 @@ function [ t, y, schemeData ] = ...
 % Ian Mitchell, 5/14/03.
 % Calling parameters modified to more closely match Matlab's ODE suite
 %   Ian Mitchell, 2/14/04.
+% Modified to allow vector level sets.  Ian Mitchell, 12/13/04.
+% Modified to add terminalEvent option, Ian Mitchell, 1/30/05.
 
   %---------------------------------------------------------------------------
   % How close (relative) do we need to be to the final time?
@@ -73,78 +75,218 @@ function [ t, y, schemeData ] = ...
   end
   
   %---------------------------------------------------------------------------
+  % This routine includes multiple substeps, and the CFL restricted timestep
+  %   size is chosen on the first substep.  Subsequent substeps may violate
+  %   CFL slightly; how much should be allowed before generating a warning?
+
+  % This choice allows 20% more than the user specified CFL number,
+  %   capped at a CFL number of unity.  The latter cap may cause
+  %   problems if the user is using a very aggressive CFL number.
+  safetyFactorCFL = min(1.0, 1.2 * options.factorCFL);
+  
+  %---------------------------------------------------------------------------
+  % Number of timesteps to be returned.
   numT = length(tspan);
   
   %---------------------------------------------------------------------------
   % If we were asked to integrate forward to a final time.
   if(numT == 2)
 
+    % Is this a vector level set integration?
+    if(iscell(y0))
+      numY = length(y0);
+    
+      % We need a cell vector form of schemeFunc.
+      if(iscell(schemeFunc))
+        schemeFuncCell = schemeFunc;
+      else
+        [ schemeFuncCell{1:numY} ] = deal(schemeFunc);
+      end
+
+    else
+      % Set numY, but be careful: ((numY == 1) & iscell(y0)) is possible.
+      numY = 1;
+    
+      % We need a cell vector form of schemeFunc.
+      schemeFuncCell = { schemeFunc };
+
+    end
+
     t = tspan(1);
-    y = y0;
     steps = 0;
     startTime = cputime;
+    stepBound = zeros(numY, 1);
+    ydot = cell(numY, 1);
+    y = y0;
     
-    while(tspan(2) - t > small * abs(tspan(2)))
+    while(tspan(2) - t >= small * abs(tspan(2)))
 
       % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      % First substep: Forward Euler from t_n to t_{n+1}.
-      
       % Approximate the derivative and CFL restriction.
-      [ ydot, stepBound ] = feval(schemeFunc, t, y, schemeData);
+      for i = 1 : numY
+        [ ydot{i}, stepBound(i), schemeData ] = ...
+                                    feval(schemeFuncCell{i}, t, y, schemeData);
 
-      % CFL bound on timestep, but not beyond the final time.
-      %   We'll use this fixed timestep for both substeps.
+        % If this is a vector level set, rotate the lists of vector arguments.
+        if(iscell(y))
+          y = y([ 2:end, 1 ]);
+        end
+
+        if(iscell(schemeData))
+          schemeData = schemeData([ 2:end, 1 ]);
+        end
+      end
+
+      % Determine CFL bound on timestep, but not beyond the final time.
+      %   For vector level sets, use the most restrictive stepBound.
+      %   We'll use this fixed timestep for all substeps.
       deltaT = min([ options.factorCFL * stepBound; ...
-                     tspan(2) - t; options.maxStep ]);
-      
+                     tspan(2) - t; options.maxStep ]);      
+
       % Take the first substep.
-      y1 = y + deltaT * ydot;
       t1 = t + deltaT;
+      if(iscell(y))
+        y1 = cell(numY, 1);
+        for i = 1 : numY
+          y1{i} = y{i} + deltaT * ydot{i};
+        end
+      else
+        y1 = y + deltaT * ydot{1};
+      end
 
       % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       % Second substep: Forward Euler from t_{n+1} to t_{n+2}.
 
-      % Approximate the derivative; we do not need the CFL information.
-      ydot = feval(schemeFunc, t1, y1, schemeData);
+      % Approximate the derivative.
+      %   We will also check the CFL condition for gross violation.
+      for i = 1 : numY
+        [ ydot{i}, stepBound(i), schemeData ] = ...
+                                 feval(schemeFuncCell{i}, t1, y1, schemeData);
 
-      % We have already computed a deltaT.
+        % If this is a vector level set, rotate the lists of vector arguments.
+        if(iscell(y1))
+          y1 = y1([ 2:end, 1 ]);
+        end
+
+        if(iscell(schemeData))
+          schemeData = schemeData([ 2:end, 1 ]);
+        end
+      end
+
+      % Check CFL bound on timestep:
+      %   If the timestep chosen on the first substep violates
+      %   the CFL condition by a significant amount, throw a warning.
+      %   For vector level sets, use the most restrictive stepBound.
+      % Occasional failure should not cause too many problems.
+      if(deltaT > min(safetyFactorCFL * stepBound))
+        warning('Second substep significantly violated CFL restriction');
+      end
       
       % Take the second substep.
-      y2 = y1 + deltaT * ydot;
       t2 = t1 + deltaT;
+      if(iscell(y1))
+        y2 = cell(numY, 1);
+        for i = 1 : numY
+          y2{i} = y1{i} + deltaT * ydot{i};
+        end
+      else
+        y2 = y1 + deltaT * ydot{1};
+      end
 
       % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       % Combine t_n and t_{n+2} to get approximation at t_{n+1/2}
-      yHalf = 0.25 * (3 * y + y2);
       tHalf = 0.25 * (3 * t + t2);
+      if(iscell(y2))
+        yHalf = cell(numY, 1);
+        for i = 1 : numY
+          yHalf{i} = 0.25 * (3 * y{i} + y2{i});
+        end
+      else
+        yHalf = 0.25 * (3 * y + y2);
+      end
 
       % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       % Third substep: Forward Euler from t_{n+1/2} to t_{n+3/2}.
 
-      % Approximate the derivative; we do not need the CFL information.
-      ydot = feval(schemeFunc, tHalf, yHalf, schemeData);
+      % Approximate the derivative.
+      %   We will also check the CFL condition for gross violation.
+      for i = 1 : numY
+        [ ydot{i}, stepBound(i), schemeData ] = ...
+                            feval(schemeFuncCell{i}, tHalf, yHalf, schemeData);
 
-      % We have already computed a deltaT.
+        % If this is a vector level set, rotate the lists of vector arguments.
+        if(iscell(yHalf))
+          yHalf = yHalf([ 2:end, 1 ]);
+        end
+
+        if(iscell(schemeData))
+          schemeData = schemeData([ 2:end, 1 ]);
+        end
+      end
+
+      % Check CFL bound on timestep:
+      %   If the timestep chosen on the first substep violates
+      %   the CFL condition by a significant amount, throw a warning.
+      %   For vector level sets, use the most restrictive stepBound.
+      % Occasional failure should not cause too many problems.
+      if(deltaT > min(safetyFactorCFL * stepBound))
+        warning('Third substep significantly violated CFL restriction');
+      end
       
-      % Take the second substep.
-      yThreeHalf = yHalf + deltaT * ydot;
+      % Take the third substep.
       tThreeHalf = tHalf + deltaT;
+      if(iscell(yHalf))
+        yThreeHalf = cell(numY, 1);
+        for i = 1 : numY
+          yThreeHalf{i} = yHalf{i} + deltaT * ydot{i};
+        end
+      else
+        yThreeHalf = yHalf + deltaT * ydot{1};
+      end
 
       % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      % If there is a terminal event function registered, we need
+      %   to maintain the info from the last timestep.
+      if(~isempty(options.terminalEvent))
+        yOld = y;
+        tOld = t;
+      end 
+
       % Combine t_n and t_{n+3/2} to get third order approximation of t_{n+1}.
-      y = (1/3) * (y + 2 * yThreeHalf);
       t = (1/3) * (t + 2 * tThreeHalf);
+      if(iscell(yThreeHalf))
+        for i = 1 : numY
+          y{i} = (1/3) * (y{i} + 2 * yThreeHalf{i});
+        end
+      else
+        y = (1/3) * (y + 2 * yThreeHalf);
+      end
 
       steps = steps + 1;
 
-      % If there is a post-timestep routine, call it.
+      % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      % If there is one or more post-timestep routines, call them.
       if(~isempty(options.postTimestep))
-        [ y schemeData ] = feval(options.postTimestep, t, y, schemeData);
+        [ y, schemeData ] = odeCFLcallPostTimestep(t, y, schemeData, options);
       end
 
       % If we are in single step mode, then do not repeat.
       if(strcmp(options.singleStep, 'on'))
         break;
+      end
+    
+      % If there is a terminal event function, establish initial sign
+      %   of terminal event vector.
+      if(~isempty(options.terminalEvent))
+
+        [ eventValue, schemeData ] = ...
+               feval(options.terminalEvent, t, y, tOld, yOld, schemeData);
+
+        if((steps > 1) && any(sign(eventValue) ~= sign(eventValueOld)))
+          break;
+        else
+          eventValueOld = eventValue;
+        end
       end
     
     end
@@ -157,19 +299,13 @@ function [ t, y, schemeData ] = ...
     end
 
   %---------------------------------------------------------------------------
-  % If we were asked for the solution at multiple timesteps,
-  %   just use recursion over each pair of timesteps.
   elseif(numT > 2)
-    t = reshape(tspan, numT, 1);
-    y = zeros(numT, length(y0));
-    y(1,:) = y0';
-    for i = 2 : numT
-      [ garbage, yout ] = odeCFL3(schemeFunc, [ t(i-1), t(i) ], y(i-1,:)', ...
-                                  schemeData, options)
-      y(i,:) = yout';
-    end
-    
+    % If we were asked for the solution at multiple timesteps.
+    [ t, y, schemeData ] = ...
+     odeCFLmultipleSteps(@odeCFL3, schemeFunc, tspan, y0, options, schemeData);
+
   %---------------------------------------------------------------------------
   else
+    % Malformed time span.
     error('tspan must contain at least two entries');
   end

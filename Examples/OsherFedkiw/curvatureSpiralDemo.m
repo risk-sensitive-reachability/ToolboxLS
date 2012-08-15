@@ -149,7 +149,7 @@ switch(initialDataFrom)
   angleM = matrixRot * M * matrixRot';
   
   % Now use the home built spiral generator.
-  data = spiralEllipse(g, angleM, d, offsetR, offsetTh);
+  data = spiralFromEllipse(g, angleM, d, offsetR, offsetTh);
 
  case 'points'
   samples = 200;

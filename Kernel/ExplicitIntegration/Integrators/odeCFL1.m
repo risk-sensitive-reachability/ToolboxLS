@@ -25,7 +25,7 @@ function [ t, y, schemeData ] = ...
 %
 % A CFL constrained ODE system is described by a function with prototype
 %
-%        [ ydot, stepBound ] = schemeFunc(t, y, schemeData)
+%        [ ydot, stepBound, schemeData ] = schemeFunc(t, y, schemeData)
 %
 %   where t is the current time, y the current state vector and
 %   schemeData is passed directly through.  The output stepBound
@@ -41,6 +41,10 @@ function [ t, y, schemeData ] = ...
 %      this version just repeatedly calls version (1), so it is not
 %      particularly efficient.
 %
+% Depending on the options specified, the final time may not be reached.
+%   If integration terminates early, then t (in tspan case (1)) or t(end) 
+%   (in tspan case(2)) will contain the final time reached.
+%
 % Note that using this routine for integrating HJ PDEs will usually
 %   require that the data array be turned into a vector before the call
 %   and reshaped into an array after the call.  Option (2) for tspan should 
@@ -48,12 +52,13 @@ function [ t, y, schemeData ] = ...
 %   for storing solutions at multiple timesteps.
 %
 % The output version of schemeData will normally be identical to the input
-%   version, and therefore can be ignored.  However, if a PostTimestep 
-%   routine is used (see odeCFLset) then schemeData may be modified during 
-%   integration, and the version of schemeData at tf is returned in this
-%   output argument.
+%   version, and therefore can be ignored.  However, it is possible for
+%   schemeFunc or a PostTimestep routine (see odeCFLset) to modify the
+%   structure during integration, and the version of schemeData at tf is 
+%   returned in this output argument.
 
-% Copyright 2004 Ian M. Mitchell (mitchell@cs.ubc.ca).
+
+% Copyright 2005 Ian M. Mitchell (mitchell@cs.ubc.ca).
 % This software is used, copied and distributed under the licensing 
 %   agreement contained in the file LICENSE in the top directory of 
 %   the distribution.
@@ -61,6 +66,8 @@ function [ t, y, schemeData ] = ...
 % Ian Mitchell, 5/14/03.
 % Calling parameters modified to more closely match Matlab's ODE suite
 %   Ian Mitchell, 2/6/04.
+% Modified to allow vector level sets.  Ian Mitchell, 11/23/04.
+% Modified to add terminalEvent option, Ian Mitchell, 1/30/05.
 
   %---------------------------------------------------------------------------
   % How close (relative) do we need to be to the final time?
@@ -73,40 +80,112 @@ function [ t, y, schemeData ] = ...
   end
   
   %---------------------------------------------------------------------------
+  % Number of timesteps to be returned.
   numT = length(tspan);
   
   %---------------------------------------------------------------------------
   % If we were asked to integrate forward to a final time.
   if(numT == 2)
 
+    % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    % Is this a vector level set integration?
+    if(iscell(y0))
+      numY = length(y0);
+    
+      % We need a cell vector form of schemeFunc.
+      if(iscell(schemeFunc))
+        schemeFuncCell = schemeFunc;
+      else
+        [ schemeFuncCell{1:numY} ] = deal(schemeFunc);
+      end
+
+    else
+      % Set numY, but be careful: ((numY == 1) & iscell(y0)) is possible.
+      numY = 1;
+
+      % We need a cell vector form of schemeFunc.
+      schemeFuncCell = { schemeFunc };
+
+    end
+
+    % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     t = tspan(1);
-    y = y0;
     steps = 0;
     startTime = cputime;
-    
-    while(tspan(2) - t > small * abs(tspan(2)))
+    stepBound = zeros(numY, 1);
+    ydot = cell(numY, 1);
+    y = y0;
 
+    % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    while(tspan(2) - t >= small * abs(tspan(2)))
+ 
       % Approximate the derivative and CFL restriction.
-      [ ydot, stepBound ] = feval(schemeFunc, t, y, schemeData);
+      for i = 1 : numY
+        [ ydot{i}, stepBound(i), schemeData ] = ...
+                                    feval(schemeFuncCell{i}, t, y, schemeData);
 
-      % CFL bound on timestep, but not beyond the final time.
+        % If this is a vector level set, rotate the lists of vector arguments.
+        if(iscell(y))
+          y = y([ 2:end, 1 ]);
+        end
+
+        if(iscell(schemeData))
+          schemeData = schemeData([ 2:end, 1 ]);
+        end
+      end
+        
+      % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      % Determine CFL bound on timestep, but not beyond the final time.
+      %   For vector level sets, use the most restrictive stepBound.
       deltaT = min([ options.factorCFL * stepBound; ...
                      tspan(2) - t; options.maxStep ]);
-      y = y + deltaT * ydot;
+
+      % If there is a terminal event function registered, we need
+      %   to maintain the info from the last timestep.
+      if(~isempty(options.terminalEvent))
+        yOld = y;
+        tOld = t;
+      end
+
+      % Update time.
       t = t + deltaT;
+
+      % Update level set functions.
+      if(iscell(y))
+        for i = 1 : numY
+          y{i} = y{i} + deltaT * ydot{i};
+        end
+      else
+        y = y + deltaT * ydot{1};
+      end
 
       steps = steps + 1;
 
-      % If there is a post-timestep routine, call it.
+      % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      % If there is one or more post-timestep routines, call them.
       if(~isempty(options.postTimestep))
-        [ y schemeData ] = feval(options.postTimestep, t, y, schemeData);
+        [ y, schemeData ] = odeCFLcallPostTimestep(t, y, schemeData, options);
       end
 
       % If we are in single step mode, then do not repeat.
       if(strcmp(options.singleStep, 'on'))
         break;
       end
-    
+
+      % If there is a terminal event function, establish initial sign
+      %   of terminal event vector.
+      if(~isempty(options.terminalEvent))
+
+        [ eventValue, schemeData ] = ...
+               feval(options.terminalEvent, t, y, tOld, yOld, schemeData);
+
+        if((steps > 1) && any(sign(eventValue) ~= sign(eventValueOld)))
+          break;
+        else
+          eventValueOld = eventValue;
+        end
+      end
+
     end
     
     endTime = cputime;
@@ -117,19 +196,13 @@ function [ t, y, schemeData ] = ...
     end
 
   %---------------------------------------------------------------------------
-  % If we were asked for the solution at multiple timesteps,
-  %   just use recursion over each pair of timesteps.
   elseif(numT > 2)
-    t = reshape(tspan, numT, 1);
-    y = zeros(numT, length(y0));
-    y(1,:) = y0';
-    for i = 2 : numT
-      [ garbage, yout ] = odeCFL1(schemeFunc, [ t(i-1), t(i) ], y(i-1,:)', ...
-                                  schemeData, options)
-      y(i,:) = yout';
-    end
+    % If we were asked for the solution at multiple timesteps.
+    [ t, y, schemeData ] = ...
+     odeCFLmultipleSteps(@odeCFL1, schemeFunc, tspan, y0, options, schemeData);
     
   %---------------------------------------------------------------------------
   else
+    % Malformed time span.
     error('tspan must contain at least two entries');
   end

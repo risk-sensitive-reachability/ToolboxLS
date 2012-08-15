@@ -1,5 +1,5 @@
 function [ data, g, data0 ] = dumbbell1(accuracy)
-% dumbbell2D: recreate figure 14.2 from Sethian
+% dumbbell1: recreate figure 14.2 from Sethian
 %
 %   [ data, g, data0 ] = dumbbell1(accuracy)
 %
