@@ -140,27 +140,22 @@ if(nargin < 2)
   accuracy = 'low';
 end
 
-% Set up spatial approximation scheme.
-schemeFunc = @termReinit;
-schemeData.grid = g;
-schemeData.initial = data0;
-
 % Set up time approximation scheme.
 integratorOptions = odeCFLset('factorCFL', 0.5, 'stats', 'on');
 
 % Choose approximations at appropriate level of accuracy.
 switch(accuracy)
  case 'low'
-  schemeData.derivFunc = @upwindFirstFirst;
+  derivFunc = @upwindFirstFirst;
   integratorFunc = @odeCFL1;
  case 'medium'
-  schemeData.derivFunc = @upwindFirstENO2;
+  derivFunc = @upwindFirstENO2;
   integratorFunc = @odeCFL2;
  case 'high'
-  schemeData.derivFunc = @upwindFirstENO3;
+  derivFunc = @upwindFirstENO3;
   integratorFunc = @odeCFL3;
  case 'veryHigh'
-  schemeData.derivFunc = @upwindFirstWENO5;
+  derivFunc = @upwindFirstWENO5;
   integratorFunc = @odeCFL3;
  otherwise
   error('Unknown accuracy level %s', accuracy);
@@ -169,6 +164,14 @@ end
 if(singleStep)
   integratorOptions = odeCFLset(integratorOptions, 'singleStep', 'on');
 end
+
+% Set up spatial approximation scheme.
+schemeFunc = @termReinit;
+schemeData.grid = g;
+schemeData.derivFunc = derivFunc;
+schemeData.initial = data0;
+% Use the subcell fix by default.
+schemeData.subcell_fix_order = 1;
 
 %---------------------------------------------------------------------------
 % Initialize Display

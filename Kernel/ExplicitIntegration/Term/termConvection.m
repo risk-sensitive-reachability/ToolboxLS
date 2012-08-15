@@ -28,6 +28,8 @@ function [ ydot, stepBound, schemeData ] = termConvection(t, y, schemeData)
 %   .derivFunc   Function handle to upwinded finite difference 
 %                  derivative approximation.
 %   .velocity	 A description of the velocity field (see below).
+%   .passVLS     An optional boolean used for vector level sets (see below).
+%                  Default is 0 (ie ignore vector level sets).
 %
 % It may contain additional fields at the user's discretion.
 %
@@ -50,6 +52,15 @@ function [ ydot, stepBound, schemeData ] = termConvection(t, y, schemeData)
 %   the call to velocityFunc will be performed with a regular data array
 %   and a single schemeData structure (as if no vector level set was present).
 %
+% This default behavior of ignoring the vector level set in the call
+%   to velocityFunc may be overridden by setting schemeData.passVLS = 1.
+%   In this case the data argument (and schemeData argument, if necessary) 
+%   in the call to velocityFunc will be the full cell vectors.  The current
+%   data array (and schemeData structure, if necessary) will be the first
+%   element of these cell vectors.  In order to properly reshape the other 
+%   elements of y, the corresponding schemeData structures must contain 
+%   an appropriate grid structure.
+%
 % In the notation of OF text,
 %
 %   data = y	  \phi, reshaped to vector form.
@@ -67,6 +78,7 @@ function [ ydot, stepBound, schemeData ] = termConvection(t, y, schemeData)
 % Ian Mitchell 5/14/03.
 % Calling parameters significantly modified, Ian Mitchell 2/6/04.
 % Updated to handle vector level sets.  Ian Mitchell 11/23/04.
+% Updated to follow passVLS protocol.  Ian Mitchell 9/19/05.
 
   %---------------------------------------------------------------------------
   % For vector level sets, ignore all the other elements.
@@ -91,10 +103,37 @@ function [ ydot, stepBound, schemeData ] = termConvection(t, y, schemeData)
   % Get velocity field.
   if(isa(thisSchemeData.velocity, 'cell'))
     velocity = thisSchemeData.velocity;
+  
   elseif(isa(thisSchemeData.velocity, 'function_handle'))
-    velocity = feval(thisSchemeData.velocity, t, data, thisSchemeData);
+
+    if(iscell(y))
+
+      if(isfield(thisSchemeData, 'passVLS') && thisSchemeData.passVLS)
+        % Pass the vector level set information through.
+        numY = length(y);
+        vectorData = cell(numY, 1);
+        for i = 1 : numY
+          if(iscell(schemeData))
+            vectorData{i} = reshape(y{i}, schemeData{i}.grid.shape);
+          else
+            vectorData{i} = reshape(y{i}, schemeData.grid.shape);
+          end
+        end
+        velocity = feval(thisSchemeData.velocity, t, vectorData, schemeData);
+
+      else
+        % Ignore any vector level set.
+        velocity = feval(thisSchemeData.velocity, t, data, thisSchemeData);
+      end
+
+    else
+      % There is no vector level set.
+      velocity = feval(thisSchemeData.velocity, t, data, thisSchemeData);
+    end
+  
   else
     error('schemeData.velocity must be a cell vector or a function handle');
+  
   end
   
   %---------------------------------------------------------------------------

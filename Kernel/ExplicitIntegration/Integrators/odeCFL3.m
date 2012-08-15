@@ -179,7 +179,8 @@ function [ t, y, schemeData ] = ...
       %   For vector level sets, use the most restrictive stepBound.
       % Occasional failure should not cause too many problems.
       if(deltaT > min(safetyFactorCFL * stepBound))
-        warning('Second substep significantly violated CFL restriction');
+        violation = deltaT / stepBound;
+        warning('Second substep violated CFL; effective number %f', violation);
       end
       
       % Take the second substep.
@@ -230,7 +231,8 @@ function [ t, y, schemeData ] = ...
       %   For vector level sets, use the most restrictive stepBound.
       % Occasional failure should not cause too many problems.
       if(deltaT > min(safetyFactorCFL * stepBound))
-        warning('Third substep significantly violated CFL restriction');
+        violation = deltaT / stepBound;
+        warning('Third substep violated CFL; effective number %f', violation);
       end
       
       % Take the third substep.

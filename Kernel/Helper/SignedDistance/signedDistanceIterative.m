@@ -126,15 +126,15 @@ deltaMax = errorMax * max(grid.dx) * prod(grid.N);
 %---------------------------------------------------------------------------
 % Reshape data array into column vector for ode solver call (if necessary).
 dataSize = size(data0);
-if(all(dataSize == grid.shape))
-  % Reshape to column vector form.
-  y = data0(:);
-  reshaped = 1;
-elseif((length(dataSize) == 2) ...
-       && (dataSize(1) == prod(grid.N)) && (dataSize(2) == 1))
+if((length(dataSize) == 2) ...
+   && (dataSize(1) == prod(grid.N)) && (dataSize(2) == 1))
   % Data is already in column vector form.
   y = data0;
   reshaped = 0;
+elseif((length(dataSize) == length(grid.shape)) && all(dataSize == grid.shape))
+  % Reshape to column vector form.
+  y = data0(:);
+  reshaped = 1;
 else
   error('Data array is not the same size as grid');
 end
@@ -160,7 +160,7 @@ while((tMax - tNow >= small * tMax) & (step < stepMax))
 
   tNow = t(end);
   step = step + 1;
-
+  
 end
 
 

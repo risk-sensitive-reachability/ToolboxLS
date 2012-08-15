@@ -1,11 +1,12 @@
-Congradulations on downloading your very own version of the Toolbox of
+Congratulations on downloading your very own version of the Toolbox of
 Level Set Methods.  If you can read this, you have successfully
 unpacked the tarball or zipfile and have all of the routines ready to
 access.
 
-To use this toolbox, you will need to run the basic version of Matlab
-(tests have been performed on version 6.5, but earlier version 6.* may
-work).  No additional toolboxes are required.
+To use this toolbox, you will need to run the basic version of Matlab.
+Tests have been performed on versions 6.5, 7.0.1 and 7.2.0 (R2006a),
+but earlier versions 6.* may work.  No additional toolboxes are
+required.
 
 To try out your distribution, go into the Examples subdirectory.
 There you will find a file:
@@ -23,4 +24,4 @@ running:
 	convectionDemo.m
 
 If it generates a figure showing a circle moving to the right, you are
-on your way.  See the documentation for more details.
+on your way.  See the documentation toolboxLS.pdf for more details.

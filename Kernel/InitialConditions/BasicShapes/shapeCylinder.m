@@ -3,9 +3,9 @@ function data = shapeCylinder(grid, ignoreDims, center, radius)
 %
 %   data = shapeCylinder(grid, ignoreDims, center, radius)
 %
-% Creates an implicit surface function (actually signed distance) 
-%   for a coordinate axis aligned cylinder whose axis runs parallel 
-%   to the coordinate dimensions specified in ignoreDims.
+% Creates an implicit surface function (actually signed distance) for a
+%   coordinate axis aligned cylinder whose axis runs parallel to the
+%   coordinate dimensions specified in ignoreDims.
 %
 % Can be used to create:
 %   Intervals, circles and spheres (if ignoreDims is empty).

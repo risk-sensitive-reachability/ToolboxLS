@@ -31,6 +31,10 @@ function C = cellMatrixMultiply(A, B)
 %   grid.shape which is the result of multiplying row i of M by the state
 %   vector x of each node in the grid.
 %
+% Note that if A or B is a pure scalar, this function is equivalent to
+%   multiplying every element of every cell entry of the other by that
+%   scalar.
+%
 % Parameters:
 %
 %   A            Cell matrix of size m by n.

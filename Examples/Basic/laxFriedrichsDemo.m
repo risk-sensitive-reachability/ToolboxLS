@@ -296,7 +296,7 @@ while(tMax - tNow > small * tMax)
   end
 
   % Create new visualization.
-  h = visualizeLevelSet(g, data, displayType, level, [ 't = ' num2str(t0) ]);
+  h = visualizeLevelSet(g, data, displayType, level, [ 't = ' num2str(tNow) ]);
 
   % Restore view.
   view(figureView);
