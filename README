@@ -1,0 +1,26 @@
+Congradulations on downloading your very own version of the Toolbox of
+Level Set Methods.  If you can read this, you have successfully
+unpacked the tarball or zipfile and have all of the routines ready to
+access.
+
+To use this toolbox, you will need to run the basic version of Matlab
+(tests have been performed on version 6.5, but earlier version 6.* may
+work).  No additional toolboxes are required.
+
+To try out your distribution, go into the Examples subdirectory.
+There you will find a file:
+
+		addPathToKernel.m  
+
+Open that file with your favorite text editor and modify the path name
+contained there so that it contains the absolute path (starting from
+root) of the Kernel subdirectory of this distribution.  Save the
+modified file.
+
+Then start Matlab, change to the Examples/Basic directory, and try
+running:
+
+	convectionDemo.m
+
+If it generates a figure showing a circle moving to the right, you are
+on your way.  See the documentation for more details.
