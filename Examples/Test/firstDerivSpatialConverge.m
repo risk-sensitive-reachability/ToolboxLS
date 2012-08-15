@@ -1,18 +1,21 @@
 % Script file to demonstrate the convergence rate of the first derivative
-%   approximation schemes.
+% approximation schemes.
 %
 % Uses firstDerivSpatialTest1 for a sequence of approximation schemes and
-%   grid sizes.
+% grid sizes.
 %
 % Also demonstrates Matlab's bizarre but useful method of accessing
-%   structure fields by string variables.
+% structure fields by string variables.
 
 % Copyright 2004 Ian M. Mitchell (mitchell@cs.ubc.ca).
+%
 % This software is used, copied and distributed under the licensing 
-%   agreement contained in the file LICENSE in the top directory of 
-%   the distribution.
+% agreement contained in the file LICENSE in the top directory of 
+% the distribution.
 %
 % Ian Mitchell, 1/25/04
+% $Date: 2010-08-09 14:38:06 -0700 (Mon, 09 Aug 2010) $
+% $Id: firstDerivSpatialConverge.m 47 2010-08-09 21:38:06Z mitchell $
 
 run('../addPathToKernel');
 

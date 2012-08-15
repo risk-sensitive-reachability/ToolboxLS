@@ -331,7 +331,7 @@ while(tMax - tNow > small * tMax)
     pause;
   end
 
-  % Get correct figure, and remember its current view.
+  % Get correct figure.
   figure(fig);
 
   % Delete last visualization if necessary.

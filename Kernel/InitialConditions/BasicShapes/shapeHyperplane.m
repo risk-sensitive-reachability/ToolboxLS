@@ -5,14 +5,19 @@ function data = shapeHyperplane(grid, normal, point)
 %
 % Creates a signed distance function for a hyperplane.
 %
-% parameters:
-%   grid	Grid structure (see processGrid.m for details).
-%   normal      Column vector specifying the outward normal of the hyperplane.
-%   point       Vector specifying a point through which the hyperplane passes.
-%                 Defaults to the origin.
+% Input Parameters:
 %
-%   data	Output data array (of size grid.size) containing the
-%                 implicit surface function.
+%   grid: Grid structure (see processGrid.m for details).
+%
+%   normal:  Column vector specifying the outward normal of the hyperplane.
+%
+%   point: Vector specifying a point through which the hyperplane passes.
+%   Defaults to the origin.
+%
+% Output Parameters:
+%
+%   data: Output data array (of size grid.size) containing the implicit
+%   surface function.
 
 % Copyright 2004 Ian M. Mitchell (mitchell@cs.ubc.ca).
 % This software is used, copied and distributed under the licensing 
@@ -20,6 +25,8 @@ function data = shapeHyperplane(grid, normal, point)
 %   the distribution.
 %
 % Ian Mitchell, 6/23/04
+% $Date: 2009-09-03 16:34:07 -0700 (Thu, 03 Sep 2009) $
+% $Id: shapeHyperplane.m 44 2009-09-03 23:34:07Z mitchell $
 
 %---------------------------------------------------------------------------
 % Default parameter values.

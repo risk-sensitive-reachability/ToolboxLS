@@ -4,37 +4,44 @@ function [ errorL, errorR, time ] = ...
 %
 % [ errorL, errorR, time ] = firstDerivSpatialTest1(scheme, dim, whichDim, dx)
 %
-% Function to test the various approximations of
-%   the first spatial derivative.
+% Function to test the various approximations of the first spatial
+% derivative.
 %
-% Uses a concatenation of shifted sin functions for data
-%   so as to introduce three derivative discontinuities
-%   (including one at the boundary in the periodic BC case).
+% Uses a concatenation of shifted sin functions for data so as to introduce
+% three derivative discontinuities (including one at the boundary in the
+% periodic BC case).
 %
 % If the function passed in scheme begins with the characters "upwind"
-%   then both left and right approximations are tested, and both
-%   errorL and errorR are generated.
+% then both left and right approximations are tested, and both
+% errorL and errorR are generated.
 %
 % Otherwise errorR = [] and errorL contains the error analysis.
 %
 % If no output parameters are requested, this function produces a figure
-%   showing the function and derivatives, as well as text output.
+% showing the function and derivatives, as well as text output.
 %
-% parameters:
-%   scheme      Function handle to the derivative calculation scheme.
-%   dim         How many dimensions should the computational grid be?
-%   whichDim    Which dimension should the derivative be calculated in?
-%   dx          Grid spacing.
+% Input Parameters:
 %
-%   errorL      structure containing information about the error
-%                 (error for the left approximation in upwinded case)
-%   errorR      structure containing information about the error
-%                 for the right approximation in the upwind case
-%                 (otherwise just empty)
-%   time        execution time to compute the derivative approximation
+%   scheme: Function handle to the derivative calculation scheme.
 %
-% The outputs errorL and errorR (when defined) are structures 
-%   with the following fields:
+%   dim: How many dimensions should the computational grid be?
+%
+%   whichDim: Which dimension should the derivative be calculated in?
+%
+%   dx: Grid spacing.
+%
+% Output Parameters:
+%
+%   errorL: structure containing information about the error (error for the
+%   left approximation in upwinded case).
+%
+%   errorR: structure containing information about the error for the right
+%   approximation in the upwind case (otherwise just empty).
+%
+%   time: execution time to compute the derivative approximation
+%
+% The outputs errorL and errorR (when defined) are structures with the
+% following fields:
 %
 %   .maximum    maximum error (inf norm)
 %   .average    average error (one norm)
@@ -47,6 +54,8 @@ function [ errorL, errorR, time ] = ...
 %   the distribution.
 %
 % Ian Mitchell, 1/22/04
+% $Date: 2010-08-09 14:38:06 -0700 (Mon, 09 Aug 2010) $
+% $Id: firstDerivSpatialTest1.m 47 2010-08-09 21:38:06Z mitchell $
 
 %---------------------------------------------------------------------------
 % Some options.

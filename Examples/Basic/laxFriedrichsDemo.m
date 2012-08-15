@@ -280,9 +280,8 @@ while(tMax - tNow > small * tMax)
     pause;
   end
 
-  % Get correct figure, and remember its current view.
+  % Get correct figure.
   figure(f);
-  figureView = view;
 
   % Delete last visualization if necessary.
   if(deleteLastPlot)
@@ -297,14 +296,11 @@ while(tMax - tNow > small * tMax)
 
   % Create new visualization.
   h = visualizeLevelSet(g, data, displayType, level, [ 't = ' num2str(tNow) ]);
-
-  % Restore view.
-  view(figureView);
   
 end
 
 endTime = cputime;
-fprintf('Total execution time %g seconds', endTime - startTime);
+fprintf('Total execution time %g seconds\n', endTime - startTime);
 
 
 

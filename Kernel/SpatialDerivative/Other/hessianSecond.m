@@ -98,7 +98,7 @@ for i = 1 : grid.dim
     indices1{j} = indReal{j} + 1;
     indices2{j} = indReal{j} - 1;
 
-    second{i,j} =  0.5 * dxInv(i) * (first{i}(indices1{:}) ...
+    second{i,j} =  0.5 * dxInv(j) * (first{i}(indices1{:}) ...
                                      - first{i}(indices2{:}));
   end
 end
