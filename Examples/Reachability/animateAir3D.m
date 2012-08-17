@@ -337,14 +337,14 @@ endTime = cputime;
 fprintf('Total execution time %g seconds', endTime - startTime);
 
 % We're finished with the movie.
-mov = close(mov);
+mov = close(mov); %#ok<NASGU>
 
 
 
 %---------------------------------------------------------------------------
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %---------------------------------------------------------------------------
-function hamValue = air3DHamFunc(t, data, deriv, schemeData)
+function hamValue = air3DHamFunc(~, ~, deriv, schemeData)
 % air3DHamFunc: analytic Hamiltonian for 3D collision avoidance example.
 %
 % hamValue = air3DHamFunc(t, data, deriv, schemeData)
@@ -397,7 +397,7 @@ hamValue = -(-schemeData.velocityA * deriv{1} ...
 %---------------------------------------------------------------------------
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %---------------------------------------------------------------------------
-function alpha = air3DPartialFunc(t, data, derivMin, derivMax, schemeData, dim)
+function alpha = air3DPartialFunc(~, ~, ~, ~, schemeData, dim)
 % air3DPartialFunc: Hamiltonian partial fcn for 3D collision avoidance example.
 %
 % alpha = air3DPartialFunc(t, data, derivMin, derivMax, schemeData, dim)

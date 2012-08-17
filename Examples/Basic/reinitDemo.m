@@ -110,7 +110,6 @@ switch(initialType)
   points = 7;
   shift = 2;
   scale = 0.25;
-  data = zeros(size(g.xs{1}));
   [ theta, r ] = cart2pol(g.xs{1}, g.xs{2});
   data = r - scale * (cos(points * theta) + shift);
 
@@ -212,7 +211,6 @@ while(tMax - tNow > small * tMax)
 
   % Get correct figure, and remember its current view.
   figure(f);
-  figureView = view;
 
   % Delete last visualization if necessary.
   if(deleteLastPlot)
@@ -222,10 +220,7 @@ while(tMax - tNow > small * tMax)
   % Create new visualization.
   h = visualizeLevelSet(g, data, displayType, level, [ 't = ' num2str(tNow) ]);
 
-  % Restore view.
-  view(figureView);
-  
 end
 
 endTime = cputime;
-fprintf('Total execution time %g seconds', endTime - startTime);
+fprintf('\nTotal execution time %g seconds\n', endTime - startTime);

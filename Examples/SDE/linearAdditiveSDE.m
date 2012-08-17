@@ -71,9 +71,6 @@ tPlot = (tMax - t0) / (plotSteps - 1);
 % How close (relative) do we need to get to tMax to be considered finished?
 small = 100 * eps;
 
-% What do you want to compute?
-payoffType = 'mean';
-
 % Useful constant.
 invSqrt2 = 1.0 / sqrt(2);
 
@@ -135,12 +132,12 @@ end
 % Dynamics.
 if(nargin < 2)
   a = 1;
-elseif(prod(size(a)) ~= 1)
+elseif(numel(a) ~= 1)
   error('Only spatially constant flow is permitted; a must be a scalar.');
 end
 if(nargin < 3)
   b = 0.1;
-elseif(prod(size(b)) ~= 1)
+elseif(numel(b) ~= 1)
   error('Only spatially constant flow is permitted; b must be a scalar.');
 end
 
@@ -294,7 +291,6 @@ while(tMax - tNow > small * tMax)
 
   % Get correct figure, and remember its current view.
   figure(f);
-  figureView = view;
 
   % Delete last visualization if necessary.
   if(deleteLastPlot)
@@ -310,10 +306,7 @@ while(tMax - tNow > small * tMax)
   % Create new visualization.
   h = visualizeLevelSet(g, data, displayType, level, [ 't = ' num2str(tNow) ]);
 
-  % Restore view.
-  view(figureView);
-  
 end
 
 endTime = cputime;
-fprintf('Total execution time %g seconds', endTime - startTime);
+fprintf('\nTotal execution time %g seconds\n', endTime - startTime);

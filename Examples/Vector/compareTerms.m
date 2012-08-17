@@ -334,7 +334,6 @@ while(tMax - tNow > small * tMax)
 
   % Get correct figure, and remember its current view.
   figure(f);
-  figureView = view;
 
   % Delete last visualization if necessary.
   if(deleteLastPlot)
@@ -360,14 +359,11 @@ while(tMax - tNow > small * tMax)
   h{elementH} = visualizeLevelSet(g, data{elementH}, displayType, ...
                                   level, [ 't = ' num2str(tNow) ]);
   setProperty(h{elementH}, styleName, styleH);
-
-  % Restore view.
-  view(figureView);
   
 end
 
 endTime = cputime;
-fprintf('Total execution time %g seconds', endTime - startTime);
+fprintf('\nTotal execution time %g seconds\n', endTime - startTime);
 
 dataC = data{elementC};
 dataH = data{elementH};
@@ -377,7 +373,7 @@ dataH = data{elementH};
 %---------------------------------------------------------------------------
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %---------------------------------------------------------------------------
-function hamValue = laxFriedrichsDemoHamFunc(t, data, deriv, schemeData)
+function hamValue = laxFriedrichsDemoHamFunc(~, data, deriv, schemeData)
 % laxFriedrichsDemoHamFunc: demonstration analytic hamiltonian function.
 %
 % hamValue = laxFriedrichsDemoHamFunc(t, data, deriv, schemeData)
@@ -417,7 +413,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %---------------------------------------------------------------------------
 function alpha = ...
-     laxFriedrichsDemoPartialFunc(t, data, derivMin, derivMax, schemeData, dim)
+     laxFriedrichsDemoPartialFunc(~, ~, ~, ~, schemeData, dim)
 % laxFriedrichsDemoPartialFunc: demonstration Hamiltonian partial function.
 %
 % alpha = ...

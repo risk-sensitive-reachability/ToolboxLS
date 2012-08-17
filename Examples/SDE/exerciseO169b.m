@@ -214,7 +214,6 @@ while(tMax - tNow > small * tMax)
 
   % Get correct figure, and remember its current view.
   figure(f);
-  figureView = view;
 
   % Delete last visualization if necessary.
   if(deleteLastPlot)
@@ -236,14 +235,11 @@ while(tMax - tNow > small * tMax)
 
   % For documentation, make the lines thicker.
   %set([ hL; hA ], 'LineWidth', 2);
-
-  % Restore view.
-  view(figureView);
   
 end
 
 endTime = cputime;
-fprintf('Total execution time %g seconds', endTime - startTime);
+fprintf('\nTotal execution time %g seconds\n', endTime - startTime);
 
 
 

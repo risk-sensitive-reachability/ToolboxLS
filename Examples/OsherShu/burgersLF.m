@@ -252,7 +252,6 @@ fprintf('Total execution time %g seconds\n', endTime - startTime);
 if(~plotIntermediate)
   % Get correct figure, and remember its current view.
   figure(f);
-  figureView = view;
   
   % Delete last visualization if necessary.
   if(deleteLastPlot)
@@ -260,10 +259,7 @@ if(~plotIntermediate)
   end
   
   % Create new visualization.
-  h = visualizeLevelSet(g, data, displayType, level, [ 't = ' num2str(tNow) ]);
-  
-  % Restore view.
-  view(figureView);
+  visualizeLevelSet(g, data, displayType, level, [ 't = ' num2str(tNow) ]);
 end
   
 
@@ -271,7 +267,7 @@ end
 %---------------------------------------------------------------------------
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %---------------------------------------------------------------------------
-function hamValue = burgersHamFunc(t, data, deriv, schemeData)
+function hamValue = burgersHamFunc(~, data, deriv, schemeData)
 % burgersHamFunc: analytic Hamiltonian for Burgers equation.
 %
 % hamValue = burgersHamFunc(t, data, deriv, schemeData)
@@ -312,7 +308,7 @@ hamValue = 0.5 * hamValue.^2;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %---------------------------------------------------------------------------
 function alpha = ...
-               burgersPartialFunc(t, data, derivMin, derivMax, schemeData, dim)
+               burgersPartialFunc(~, data, derivMin, derivMax, schemeData, ~)
 % burgersPartialFunc: analytic Hamiltonian partial function for Burgers.
 %
 % alpha = burgersPartialFunc(t, data, derivMin, derivMax, schemeData, dim)
