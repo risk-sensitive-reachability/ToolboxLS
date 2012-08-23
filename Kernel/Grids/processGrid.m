@@ -82,10 +82,7 @@ function gridOut = processGrid(gridIn, data)
 %  new version  5/13/03 added fields dim, dx, vs, xs, bdry.
 %  new version  1/13/04 added field bdryData.
 %  new version  2/09/04 added field shape.
-%
-% Subversion tags for version control purposes.
-% $Date: 2012-08-15 15:24:40 -0700 (Wed, 15 Aug 2012) $
-% $Id: processGrid.m 75 2012-08-15 22:24:40Z mitchell $
+%  new version  8/23/12 fixed some floating point problems with N and dx.
 
   %----------------------------------------------------------------------------
   defaultMin = 0;
@@ -163,8 +160,8 @@ function gridOut = processGrid(gridIn, data)
   end
 
   %----------------------------------------------------------------------------
-  % Process N and dx fields together, check for consistency.
-
+  % Check N field if necessary.  If N is missing but dx is present, we will
+  % determine N later.
   if(isfield(gridOut, 'N'))
     if(any(gridOut.N <= 0))
       error('number of grid cells must be strictly positive'); 
@@ -176,44 +173,30 @@ function gridOut = processGrid(gridIn, data)
         error('N field is not column vector of length dim or a scalar');
       end
     end
-    if(isfield(gridOut, 'dx'))
-      if(any(gridOut.dx <= 0))
-        error('grid cell size dx must be strictly positive');
-      end
-      % check consistency
-      if(~isColumnLength(gridOut.dx, gridOut.dim))
-        if(isscalar(gridOut.dx))
-          gridOut.dx = gridOut.dx * ones(gridOut.dim, 1);
-        else
-          error('dx field is not column vector of length dim or a scalar');
-        end
-      end
-      if(any((gridOut.N - 1) ~= floor((gridOut.max - gridOut.min) ./ gridOut.dx)))
-        error('N and dx fields are inconsistent');
-      end
-    else
-      % infer dx
-      gridOut.dx = (gridOut.max - gridOut.min) ./ (gridOut.N - 1);
+  end    
+  
+  %----------------------------------------------------------------------------
+  % Check dx field if necessary.  If dx is missing but N is present, infer
+  % dx.  If both are present, we will check for consistency later.  If
+  % neither are present, use the defaults.
+  if isfield(gridOut, 'dx')
+    if(any(gridOut.dx <= 0))
+      error('grid cell size dx must be strictly positive');
     end
+    if(~isColumnLength(gridOut.dx, gridOut.dim))
+      if(isscalar(gridOut.dx))
+        gridOut.dx = gridOut.dx * ones(gridOut.dim, 1);
+      else
+        error('dx field is not column vector of length dim or a scalar');
+      end
+    end
+  elseif isfield(gridOut, 'N')
+    % Only N field is present, so infer dx.
+    gridOut.dx = (gridOut.max - gridOut.min) ./ (gridOut.N - 1);
   else
-    if(isfield(gridOut, 'dx'))
-      if(any(gridOut.dx <= 0))
-        error('grid cell size dx must be strictly positive');
-      end
-      % infer N 
-      if(~isColumnLength(gridOut.dx, gridOut.dim))
-        if(isscalar(gridOut.dx))
-          gridOut.dx = gridOut.dx * ones(gridOut.dim, 1);
-        else
-          error('dx field is not column vector of length dim or a scalar');
-        end
-      end
-      gridOut.N = floor((gridOut.max - gridOut.min) ./ gridOut.dx) + 1;
-    else
-      % default N, infer dx
-      gridOut.N = defaultN * ones(gridOut.dim, 1);
-      gridOut.dx = (gridOut.max - gridOut.min) ./ (gridOut.N - 1);
-    end
+    % Neither field is present, so use default N and infer dx
+    gridOut.N = defaultN * ones(gridOut.dim, 1);
+    gridOut.dx = (gridOut.max - gridOut.min) ./ (gridOut.N - 1);
   end
 
   %----------------------------------------------------------------------------
@@ -238,6 +221,22 @@ function gridOut = processGrid(gridIn, data)
     end
   end
 
+  % Now we can check for consistency between dx and N, based on the size of
+  % the vectors in vs.  Note that if N is present, it will be a vector.  If
+  % N is not yet a field, set it to be consistent with the size of vs.
+  if isfield(gridOut, 'N')
+    for i = 1 : gridOut.dim
+      if(gridOut.N(i) ~= length(gridOut.vs{i}))
+        error('Inconsistent grid size in dimension %d', i);
+      end
+    end
+  else
+    gridOut.N = zeros(gridOut.dim, 1);
+    for i = 1 : gridOut.dim
+      gridOut.N(i) = length(gridOut.vs{i});
+    end
+  end
+        
   %----------------------------------------------------------------------------
   if(isfield(gridOut, 'xs'))
     if(iscell(gridOut.xs))
