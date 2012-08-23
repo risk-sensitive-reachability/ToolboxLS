@@ -15,15 +15,15 @@ function value = odeCFLget(options, name)
 %
 % Available options (options names are case insensitive):
 %
-%   factorCFL    Scalar by which to multiply CFL timestep bound in order
+%   FactorCFL    Scalar by which to multiply CFL timestep bound in order
 %                  to determine the timestep to actually take.
 %                  Typically in range (0,1), default = 0.5
 %                  choose 0.9 for aggressive integration.
 %
-%   maxStep      Maximum step size (independent of CFL).
+%   MaxStep      Maximum step size (independent of CFL).
 %                  Default is REALMAX.
 %
-%   postTimestep Function handle to a routine with prototype
+%   PostTimestep Function handle to a routine with prototype
 %                       [ yOut schemeDataOut ] = f(t, yIn, schemeDataIn)
 %                  which is called after every timestep and can be used
 %                  to modify the state vector y or to modify or record
@@ -33,14 +33,14 @@ function value = odeCFLget(options, name)
 %                  after each timestep.
 %                Defaults to [], which calls no function.
 %
-%   singleStep   Specifies whether to exit integrator after a single
+%   SingleStep   Specifies whether to exit integrator after a single
 %                  CFL constrained timestep (for debugging).
 %                  Either 'on' or 'off', default = 'off'.
 %
-%   stats        Specifies whether to display statistics.
+%   Stats        Specifies whether to display statistics.
 %                  Either 'on' or 'off', default = 'off'.
 %
-%   terminalEvent Function handle to a routine with prototype
+%   TerminalEvent Function handle to a routine with prototype
 %                        [ value, schemeDataOut ] = ...
 %                                     f(t, y, deltaT, updateY, schemeDataIn)
 %                   which is called after every timestep and can be used to

@@ -230,9 +230,8 @@ while(tMax - tNow > small * tMax)
       pause;
     end
     
-    % Get correct figure, and remember its current view.
+    % Get correct figure.
     figure(f);
-    figureView = view;
 
     % Delete last visualization if necessary.
     if(deleteLastPlot)
@@ -242,20 +241,17 @@ while(tMax - tNow > small * tMax)
     % Create new visualization.
     h = visualizeLevelSet(g, data, displayType, level, ['t = ' num2str(tNow)]);
 
-    % Restore view.
-    view(figureView);
   end
 end
 
 endTime = cputime;
-fprintf('Total execution time %g seconds', endTime - startTime);
+fprintf('Total execution time %g seconds\n', endTime - startTime);
 
 %---------------------------------------------------------------------------
 % Plot the final result, if it has not already appeared.
 if(~plotIntermediate)
-  % Get correct figure, and remember its current view.
+  % Get correct figure.
   figure(f);
-  figureView = view;
   
   % Delete last visualization if necessary.
   if(deleteLastPlot)
@@ -263,10 +259,7 @@ if(~plotIntermediate)
   end
   
   % Create new visualization.
-  h = visualizeLevelSet(g, data, displayType, level, [ 't = ' num2str(tNow) ]);
-  
-  % Restore view.
-  view(figureView);
+  visualizeLevelSet(g, data, displayType, level, [ 't = ' num2str(tNow) ]);
 end
   
 
@@ -274,7 +267,7 @@ end
 %---------------------------------------------------------------------------
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %---------------------------------------------------------------------------
-function hamValue = nonconvexHamFunc(t, data, deriv, schemeData)
+function hamValue = nonconvexHamFunc(~, data, deriv, schemeData)
 % nonconvexHamFunc: analytic Hamiltonian for nonconvex HJ PDE.
 %
 % hamValue = nonconvexHamFunc(t, data, deriv, schemeData)
@@ -315,7 +308,7 @@ hamValue = -cos(hamValue);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %---------------------------------------------------------------------------
 function alpha = ...
-             nonconvexPartialFunc(t, data, derivMin, derivMax, schemeData, dim)
+             nonconvexPartialFunc(~, ~, ~, ~, schemeData, ~)
 % nonconvexPartialFunc: Hamiltonian partial function for nonconvex example.
 %
 % alpha = nonconvexPartialFunc(t, data, derivMin, derivMax, schemeData, dim)
@@ -333,7 +326,7 @@ function alpha = ...
 %
 % So we are maximizing over p the function |\sin(\alpha + \sum_i p_i)|.
 %   Ideally, we would solve this nonconvex optimization.
-%   For simplicity, we'll just assume that |sin(...)| = 1.
+%   For simplicity, we'll just use |sin(...)| <= 1.
 %
 % Parameters:
 %   t            Time at beginning of timestep (ignored).

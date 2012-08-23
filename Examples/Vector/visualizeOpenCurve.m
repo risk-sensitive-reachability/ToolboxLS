@@ -5,27 +5,28 @@ function [ hCurve, hAll ] = ...
 %   [ hCurve, hAll ] = ...
 %                      visualizeOpenCurve(grid, curve, mask, showAll, titleStr)
 %
-% Regular level set functions can be used only for closed curves
-%   (in 2D spaces).  As observed in
+% Regular level set functions can be used only for closed curves (in 2D
+% spaces).  As observed in
 %
 %      Peter Smereka, "Spiral Crystal Growth," 
 %      Physica D 138, pp. 282-301 (2000).
 %
-%   open curves can be represented by a vector level set:
-%      \Gamma = \{ x | \phi(x) = 0 and \psi(x) \leq 0 \}
+% open curves can be represented by a vector level set:
+%
+%      \Gamma = \{ x | \phi(x) = 0 and \psi(x) >= 0 \}
 %
 % Following Smereka's method for plotting this "open curve", we define
 %
 %      \theta = abs(\phi), if \psi \geq 0;
 %                 +1,      if \psi   <  0.
 %
-%   and then plot the zero contour of \theta - 0.5 * max(g.dx).
-%   This generates a double line that is usually visually indistinguishable
-%   from a single line.
+% and then plot the zero contour of \theta - 0.5 * max(g.dx).  This
+% generates a double line that is usually visually indistinguishable from a
+% single line.
 %
-% If the boolean parameter showAll is set, the entire zero contour of
-%   \phi is plotted first, and then overlapped with the \theta contour
-%   for those portions which are physical.
+% If the boolean parameter showAll is set, the entire zero contour of \phi
+% is plotted first, and then overlapped with the \theta contour for those
+% portions which are physical.
 %
 % Parameters:
 %

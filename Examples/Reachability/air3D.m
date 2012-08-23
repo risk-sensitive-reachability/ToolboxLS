@@ -4,41 +4,42 @@ function [ data, g, data0 ] = air3D(accuracy)
 %   [ data, g, data0 ] = air3D(accuracy)
 %  
 % In this example, the target set is a circle at the origin (cylinder in 3D)
-%   that represents a collision in relative coordinates between the evader
-%   (player a, fixed at the origin facing right) and the pursuer (player b).
+% that represents a collision in relative coordinates between the evader
+% (player a, fixed at the origin facing right) and the pursuer (player b).
 %
 % The relative coordinate dynamics are
 %
-%        \dot x    = -v_a + v_b \cos \psi + a y
-%	 \dot y    = v_b \sin \psi - a x
-%	 \dot \psi = b - a
+%   \dot x    = -v_a + v_b \cos \psi + a y
+%	  \dot y    = v_b \sin \psi - a x
+%	  \dot \psi = b - a
 %
-%   where v_a and v_b are constants, 
-%         input a is trying to avoid the target
-%	  input b is trying to hit the target.
+% where v_a and v_b are constants, input a is trying to avoid the target
+%	input b is trying to hit the target.
 %
 % For more details, see my PhD thesis, section 3.1.
 %
 % This function was originally designed as a script file, so most of the
-%   options can only be modified in the file.
-%
-% For example, edit the file to change the grid dimension, boundary conditions,
-%   aircraft parameters, etc.
+% options can only be modified in the file.  For example, edit the file to
+% change the grid dimension, boundary conditions, aircraft parameters, etc.
 %
 % To get exactly the result from the thesis choose:
 %   targetRadius = 5, velocityA = velocityB = 5, inputA = inputB = +1.
 %
-% Parameters:
+% Input Parameters:
 %
-%   accuracy     Controls the order of approximations.
-%                  'low'         Use odeCFL1 and upwindFirstFirst.
-%                  'medium'      Use odeCFL2 and upwindFirstENO2 (default).
-%                  'high'        Use odeCFL3 and upwindFirstENO3.
-%                  'veryHigh'    Use odeCFL3 and upwindFirstWENO5.
+%   accuracy: Controls the order of approximations.
+%     'low': Use odeCFL1 and upwindFirstFirst.
+%     'medium': Use odeCFL2 and upwindFirstENO2 (default).
+%     'high': Use odeCFL3 and upwindFirstENO3.
+%     'veryHigh': Use odeCFL3 and upwindFirstWENO5.
 %
-%   data         Implicit surface function at t_max.
-%   g            Grid structure on which data was computed.
-%   data0        Implicit surface function at t_0.
+% Output Parameters:
+%
+%   data: Implicit surface function at t_max.
+%
+%   g: Grid structure on which data was computed.
+%
+%   data0: Implicit surface function at t_0.
 
 % Copyright 2004 Ian M. Mitchell (mitchell@cs.ubc.ca).
 % This software is used, copied and distributed under the licensing 
@@ -46,6 +47,9 @@ function [ data, g, data0 ] = air3D(accuracy)
 %   the distribution.
 %
 % Ian Mitchell, 3/26/04
+% Subversion tags for version control purposes.
+% $Date: 2012-07-04 14:27:00 -0700 (Wed, 04 Jul 2012) $
+% $Id: air3D.m 74 2012-07-04 21:27:00Z mitchell $
 
 %---------------------------------------------------------------------------
 % You will see many executable lines that are commented out.
@@ -242,7 +246,7 @@ while(tMax - tNow > small * tMax)
 
   % Get correct figure, and remember its current view.
   figure(f);
-  figureView = view;
+  [ view_az, view_el ] = view;
 
   % Delete last visualization if necessary.
   if(deleteLastPlot)
@@ -259,12 +263,12 @@ while(tMax - tNow > small * tMax)
   h = visualizeLevelSet(g, data, displayType, level, [ 't = ' num2str(tNow) ]);
 
   % Restore view.
-  view(figureView);
+  view(view_az, view_el);
   
 end
 
 endTime = cputime;
-fprintf('Total execution time %g seconds', endTime - startTime);
+fprintf('Total execution time %g seconds\n', endTime - startTime);
 
 
 %---------------------------------------------------------------------------

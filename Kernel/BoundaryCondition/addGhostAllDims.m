@@ -27,8 +27,6 @@ function dataOut = addGhostAllDims(grid, dataIn, width)
 %
 % Ian Mitchell, 6/3/03
 
-grid = processGrid(grid, dataIn);
-
 dataOut = dataIn;
 
 % add ghost cells

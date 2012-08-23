@@ -233,7 +233,6 @@ while(tMax - tNow > small * tMax)
 
   % Get correct figure, and remember its current view.
   figure(f);
-  figureView = view;
 
   % Delete last visualization if necessary.
   if(deleteLastPlot)
@@ -249,14 +248,11 @@ while(tMax - tNow > small * tMax)
   % Create new visualization.
   h = visualizeLevelSet(g, data, displayType, level, [ 't = ' num2str(tNow) ]);
 
-  % Restore view.
-  view(figureView);
-  
 end
 
 %---------------------------------------------------------------------------
 endTime = cputime;
-fprintf('Total execution time %g seconds', endTime - startTime);
+fprintf('\nTotal execution time %g seconds\n', endTime - startTime);
 
 %---------------------------------------------------------------------------
 % Process and display final results.
@@ -266,11 +262,11 @@ if(g.dim == 2)
   % Display initial set, mask, minimum over time, and final set.
   figure;
   lev = [ level level ];
-  [ garbage, hI ] = contour(g.xs{1}, g.xs{2}, data0, lev, 'b--');
+  [ ~, hI ] = contour(g.xs{1}, g.xs{2}, data0, lev, 'b--');
   hold on;
-  [ garbage, hF ] = contour(g.xs{1}, g.xs{2}, data, lev, 'r-');
-  [ garbage, hT ] = contour(g.xs{1}, g.xs{2}, minOverTime, lev, 'k:');
-  [ garbage, hM ] = contour(g.xs{1}, g.xs{2}, mask, lev, 'g-.');
+  [ ~, hF ] = contour(g.xs{1}, g.xs{2}, data, lev, 'r-');
+  [ ~, hT ] = contour(g.xs{1}, g.xs{2}, minOverTime, lev, 'k:');
+  [ ~, hM ] = contour(g.xs{1}, g.xs{2}, mask, lev, 'g-.');
 
   hs = [ hI; hF; hT; hM ];
 
@@ -281,7 +277,7 @@ if(g.dim == 2)
   axis equal
   axis(g.axis);
 else
-  warning('Cannot create final plot in dimensions other than 2D');
+  warning('Cannot create final plot in dimensions other than 2D'); %#ok<WNTAG>
 end
 
 
@@ -289,7 +285,7 @@ end
 %---------------------------------------------------------------------------
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %---------------------------------------------------------------------------
-function [ yOut, schemeDataOut ] = maskAndKeepMin(t, yIn, schemeDataIn)
+function [ yOut, schemeDataOut ] = maskAndKeepMin(~, yIn, schemeDataIn)
 % maskAndKeepMin: Example postTimestep processing routine.
 %
 %  [ yOut, schemeDataOut ] = maskAndKeepMin(t, yIn, schemeDataIn)

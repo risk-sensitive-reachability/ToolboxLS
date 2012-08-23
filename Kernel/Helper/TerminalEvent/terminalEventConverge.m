@@ -38,7 +38,7 @@ function [ value, schemeDataOut ] = ...
 %                      Default is 1e-3.
 %   .convergeNorm    Norm in which convergence is measured
 %                      In order of increasing tightness, the options are:
-%                      'average'    Average over all node points.
+%                      'average'    Average over all node points (default).
 %                      'maximum'    Maximum over all node points.
 %                      'pointwise'  Each node point tested individually.
 %
@@ -51,6 +51,10 @@ function [ value, schemeDataOut ] = ...
 %
 % Ian Mitchell 1/30/05
 
+  if iscell(y)
+    error('TerminalEventConverge does not work on vector level sets.');
+  end
+    
   % schemeData is unchanged.
   schemeDataOut = schemeDataIn;
 

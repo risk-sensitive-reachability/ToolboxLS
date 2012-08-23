@@ -48,6 +48,8 @@ function [ yOut, schemeDataOut ] = postTimestepReinit(t, yIn, schemeDataIn)
 %
 % Ian Mitchell 12/06/04.
 % Modified to accept vector level sets, Ian Mitchell 2/16/05
+% $Date: 2010-08-09 21:31:46 -0700 (Mon, 09 Aug 2010) $
+% $Id: postTimestepReinit.m 50 2010-08-10 04:31:46Z mitchell $
 
   %---------------------------------------------------------------------------
   % Copy schemeData structure unchanged.
@@ -65,7 +67,7 @@ function [ yOut, schemeDataOut ] = postTimestepReinit(t, yIn, schemeDataIn)
       end
     end
   else
-    yOut = doReinit(yIn, schemeDataIn)
+    yOut = doReinit(yIn, schemeDataIn);
   end
 
   
@@ -94,6 +96,7 @@ function yOut = doReinit(yIn, schemeData)
   if(isfield(schemeData, 'reinitPerform') && ~schemeData.reinitPerform)
     % We are supposed to skip reinitialization.
     yOut = yIn;
+    return;
   end
 
   %---------------------------------------------------------------------------
@@ -114,6 +117,11 @@ function yOut = doReinit(yIn, schemeData)
       % Enough time to pass right across the grid.
       tMax = max(grid.max - grid.min);
     else
+      % We might be told to take zero (or a negative number of) steps.
+      if(schemeData.reinitSteps < 1)
+        yOut = yIn;
+        return;
+      end
       % To take a certain number of steps, pass tMax < 0.
       tMax = -schemeData.reinitSteps;
     end

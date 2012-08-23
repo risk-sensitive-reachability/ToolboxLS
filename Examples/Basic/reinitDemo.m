@@ -110,7 +110,6 @@ switch(initialType)
   points = 7;
   shift = 2;
   scale = 0.25;
-  data = zeros(size(g.xs{1}));
   [ theta, r ] = cart2pol(g.xs{1}, g.xs{2});
   data = r - scale * (cos(points * theta) + shift);
 
@@ -140,27 +139,22 @@ if(nargin < 2)
   accuracy = 'low';
 end
 
-% Set up spatial approximation scheme.
-schemeFunc = @termReinit;
-schemeData.grid = g;
-schemeData.initial = data0;
-
 % Set up time approximation scheme.
 integratorOptions = odeCFLset('factorCFL', 0.5, 'stats', 'on');
 
 % Choose approximations at appropriate level of accuracy.
 switch(accuracy)
  case 'low'
-  schemeData.derivFunc = @upwindFirstFirst;
+  derivFunc = @upwindFirstFirst;
   integratorFunc = @odeCFL1;
  case 'medium'
-  schemeData.derivFunc = @upwindFirstENO2;
+  derivFunc = @upwindFirstENO2;
   integratorFunc = @odeCFL2;
  case 'high'
-  schemeData.derivFunc = @upwindFirstENO3;
+  derivFunc = @upwindFirstENO3;
   integratorFunc = @odeCFL3;
  case 'veryHigh'
-  schemeData.derivFunc = @upwindFirstWENO5;
+  derivFunc = @upwindFirstWENO5;
   integratorFunc = @odeCFL3;
  otherwise
   error('Unknown accuracy level %s', accuracy);
@@ -169,6 +163,14 @@ end
 if(singleStep)
   integratorOptions = odeCFLset(integratorOptions, 'singleStep', 'on');
 end
+
+% Set up spatial approximation scheme.
+schemeFunc = @termReinit;
+schemeData.grid = g;
+schemeData.derivFunc = derivFunc;
+schemeData.initial = data0;
+% Use the subcell fix by default.
+schemeData.subcell_fix_order = 1;
 
 %---------------------------------------------------------------------------
 % Initialize Display
@@ -209,7 +211,6 @@ while(tMax - tNow > small * tMax)
 
   % Get correct figure, and remember its current view.
   figure(f);
-  figureView = view;
 
   % Delete last visualization if necessary.
   if(deleteLastPlot)
@@ -219,10 +220,7 @@ while(tMax - tNow > small * tMax)
   % Create new visualization.
   h = visualizeLevelSet(g, data, displayType, level, [ 't = ' num2str(tNow) ]);
 
-  % Restore view.
-  view(figureView);
-  
 end
 
 endTime = cputime;
-fprintf('Total execution time %g seconds', endTime - startTime);
+fprintf('\nTotal execution time %g seconds\n', endTime - startTime);

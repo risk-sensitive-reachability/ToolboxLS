@@ -4,33 +4,40 @@ function [ data, g, data0 ] = curvatureStarDemo(accuracy,splitFlow,displayType)
 %   [ data, g, data0 ] = curvatureStarDemo(accuracy, splitFlow, displayType)
 %
 % Recreates figure 4.2 from O&F chapter 4, showing motion by mean curvature
-%   of a star-shaped interface in two dimensions.  The parameters were
-%   guessed by trial and error.
+% of a star-shaped interface in two dimensions.  The parameters were guessed
+% by trial and error.
 %  
 % This function was originally designed as a script file, so most of the
-%   options can only be modified in the file.
-%
-% For example, edit the file to change the grid dimension, boundary conditions,
-%   flow field parameters, etc.
-%
-% There is also a time-dependent version of the flow field defined, which
-%   can be tested by editing the file.
+% options can only be modified in the file.  For example, edit the file to
+% change the grid dimension, boundary conditions, flow field parameters,
+% etc.
 %
 % Parameters:
 %
-%   accuracy     Controls the order of approximations.
-%                Note that the spatial approximation is always second order.
+%   accuracy: Controls the order of approximations.  Note that the spatial
+%   approximation is always second order.
+%
 %                  'low'         Use odeCFL1.
 %                  'medium'      Use odeCFL2 (default).
 %                  'high'        Use odeCFL3.
-%   displayType  String to specify how to display results.
-%                  The specific string depends on the grid dimension;
-%                  look at the helper visualizeLevelSet to see the options
-%                  (optional, default depends on grid dimension).
 %
-%   data         Implicit surface function at t_max.
-%   g            Grid structure on which data was computed.
-%   data0        Implicit surface function at t_0.
+%   splitFlow: Boolean.  Use the time dependent version of the flow
+%   field, which freezes the right half of the domain while moving the
+%   left half at double speed until the half-way time, and then freezes
+%   the left half while moving the right at double speed.  Otherwise, the
+%   whole domain is moved at a constant speed.  Optional.  Default = 0.
+%
+%   displayType: String to specify how to display results.  The specific
+%   string depends on the grid dimension; look at the helper
+%   visualizeLevelSet to see the options.  Optional.  Default = 'contour'.
+%
+% Output Parameters:
+%
+%   data: Implicit surface function at t_max.
+%
+%   g: Grid structure on which data was computed.
+%
+%   data0: Implicit surface function at t_0.
 
 % Copyright 2004 Ian M. Mitchell (mitchell@cs.ubc.ca).
 % This software is used, copied and distributed under the licensing 
@@ -52,6 +59,10 @@ run('../addPathToKernel');
 % Curvature speed parameter.
 bValue = 0.02;
 
+if(nargin < 1)
+  accuracy = 'medium';
+end
+
 % Use the time dependent motion?
 if(nargin < 2)
   useTimeDependent = 0;
@@ -59,15 +70,20 @@ else
   useTimeDependent = splitFlow;
 end
 
+% What kind of display?
+if(nargin < 3)
+  displayType = 'contour';    
+end
+
 %---------------------------------------------------------------------------
 % Integration parameters.
-tMax = 1.0;                  % End time.
-plotSteps = 9;               % How many intermediate plots to produce?
-t0 = 0;                      % Start time.
-singleStep = 0;              % Plot at each timestep (overrides tPlot).
+% Integration parameters.
+plot_points = [ 0; 0.25; 0.5; 1.0 ];
+tMax = max(plot_points);                  % End time.
+t0 = 0;                                   % Start time.
 
-% Period at which intermediate plots should be produced.
-tPlot = (tMax - t0) / (plotSteps - 1);
+% Plot at each timestep (overrides plot_points).
+singleStep = 0;
 
 % How close (relative) do we need to get to tMax to be considered finished?
 small = 100 * eps;
@@ -85,37 +101,18 @@ deleteLastPlot = 0;
 % Plot in separate subplots (set deleteLastPlot = 0 in this case)?
 useSubplots = 1;
 
-%---------------------------------------------------------------------------
-% Use periodic boundary conditions?
-periodic = 0;
+% If subplots are used, try to make a square set or put them all in a
+% line?
+subplots_in_line = 1;
 
+%---------------------------------------------------------------------------
 % Create the grid.
 g.dim = 2;
 g.min = -1;
+g.max = +1;
 g.dx = 1 / 50;
-if(periodic)
-  g.max = (1 - g.dx);
-  g.bdry = @addGhostPeriodic;
-else
-  g.max = +1;
-  g.bdry = @addGhostExtrapolate;
-end
+g.bdry = @addGhostExtrapolate;
 g = processGrid(g);
-
-%---------------------------------------------------------------------------
-% What kind of display?
-if(nargin < 3)
-  switch(g.dim)
-   case 1
-    displayType = 'plot';
-   case 2
-    displayType = 'contour';    
-   case 3
-    displayType = 'surface';
-   otherwise
-    error('Default display type undefined for dimension %d', g.dim);
-  end
-end
 
 %---------------------------------------------------------------------------
 % Create initial conditions (star shaped interface centered at origin).
@@ -152,12 +149,8 @@ else
 end
 
 %---------------------------------------------------------------------------
-if(nargin < 1)
-  accuracy = 'medium';
-end
-
 % Set up time approximation scheme.
-integratorOptions = odeCFLset('factorCFL', 0.5, 'stats', 'on');
+integratorOptions = odeCFLset('factorCFL', 0.9, 'stats', 'on');
 
 % Choose approximations at appropriate level of accuracy.
 switch(accuracy)
@@ -178,19 +171,24 @@ end
 %---------------------------------------------------------------------------
 % Initialize Display
 f = figure;
+plot_count = 1;
 
 % Set up subplot parameters if necessary.
-if(useSubplots)
-  rows = ceil(sqrt(plotSteps));
-  cols = ceil(plotSteps / rows);
-  plotNum = 1;
-  subplot(rows, cols, plotNum);
+if useSubplots
+  if subplots_in_line
+    rows = 1;
+    cols = length(plot_points);
+  else
+    rows = ceil(sqrt(length(plot_points)));
+    cols = ceil(length(plot_points) / rows);
+  end
+  subplot(rows, cols, plot_count);
 end
 
-h = visualizeLevelSet(g, data, displayType, level, [ 't = ' num2str(t0) ]);
-
-hold on;
-if(g.dim > 1)
+if(plot_points(1) == t0)
+  h = visualizeLevelSet(g, data, displayType, level, [ 't = ' num2str(t0) ]);
+  plot_count = plot_count + 1;
+  hold on;
   axis(g.axis);
   daspect([ 1 1 1 ]);
 end
@@ -205,7 +203,7 @@ while(tMax - tNow > small * tMax)
   y0 = data(:);
 
   % How far to step?
-  tSpan = [ tNow, min(tMax, tNow + tPlot) ];
+  tSpan = [ tNow, plot_points(plot_count) ];
   
   % Take a timestep.
   [ t y ] = feval(integratorFunc, schemeFunc, tSpan, y0,...
@@ -220,9 +218,8 @@ while(tMax - tNow > small * tMax)
     pause;
   end
 
-  % Get correct figure, and remember its current view.
+  % Get correct figure.
   figure(f);
-  figureView = view;
 
   % Delete last visualization if necessary.
   if(deleteLastPlot)
@@ -231,20 +228,17 @@ while(tMax - tNow > small * tMax)
 
   % Move to next subplot if necessary.
   if(useSubplots)
-    plotNum = plotNum + 1;
-    subplot(rows, cols, plotNum);
+    subplot(rows, cols, plot_count);
   end
 
   % Create new visualization.
   h = visualizeLevelSet(g, data, displayType, level, [ 't = ' num2str(tNow) ]);
-
-  % Restore view.
-  view(figureView);
+  plot_count = plot_count + 1;
   
 end
 
 endTime = cputime;
-fprintf('Total execution time %g seconds', endTime - startTime);
+fprintf('Total execution time %g seconds\n', endTime - startTime);
 
 
 

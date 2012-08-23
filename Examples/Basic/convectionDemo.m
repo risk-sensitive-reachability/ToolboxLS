@@ -119,13 +119,13 @@ switch(flowType)
  case 'constantRev'
   v = @switchValue;
   schemeData.one = constantV;
-  schemeData.two = cellMatrixMultiply(-1, constantV)
+  schemeData.two = cellMatrixMultiply(-1, constantV);
   schemeData.tSwitch = 0.5 * tMax;
  
  case 'linearRev'
   v = @switchValue;
   schemeData.one = linearV;
-  schemeData.two = cellMatrixMultiply(-1, linearV)
+  schemeData.two = cellMatrixMultiply(-1, linearV);
   schemeData.tSwitch = 0.5 * tMax;
 
  otherwise
@@ -244,7 +244,7 @@ while(tMax - tNow > small * tMax)
 
   % Get correct figure, and remember its current view.
   figure(f);
-  figureView = view;
+  [ figure_az, figure_el ] = view;
 
   % Delete last visualization if necessary.
   if(deleteLastPlot)
@@ -261,19 +261,19 @@ while(tMax - tNow > small * tMax)
   h = visualizeLevelSet(g, data, displayType, level, [ 't = ' num2str(tNow) ]);
 
   % Restore view.
-  view(figureView);
+  view(figure_az, figure_el);
   
 end
 
 endTime = cputime;
-fprintf('Total execution time %g seconds', endTime - startTime);
+fprintf('\nTotal execution time %g seconds\n', endTime - startTime);
 
 
 
 %---------------------------------------------------------------------------
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %---------------------------------------------------------------------------
-function out = switchValue(t, data, schemeData)
+function out = switchValue(t, data, schemeData) %#ok<INUSL>
 % switchValue: switches between two values.
 %
 %  out = switchValue(t, data, schemeData)

@@ -4,9 +4,9 @@ function [ data, g, data0 ] = animateAir3D(filename, accuracy, compress)
 %   [ data, g, data0 ] = animateAir3D(filename, accuracy, compress)
 %  
 % This file generates an animation showing how the reachable set grows
-%   as time progresses.  It is basically a combination of the files:
-%        air3D (which sets up and handles the reach set calculation),
-%        spinAnimation (which has the code necessary for animations).
+% as time progresses.  It is basically a combination of the files:
+%   air3D (which sets up and handles the reach set calculation),
+%   spinAnimation (which has the code necessary for animations).
 %
 % NOTES:
 %
@@ -23,48 +23,51 @@ function [ data, g, data0 ] = animateAir3D(filename, accuracy, compress)
 %
 %
 % In this example, the target set is a circle at the origin (cylinder in 3D)
-%   that represents a collision in relative coordinates between the evader
-%   (player a, fixed at the origin facing right) and the pursuer (player b).
+% that represents a collision in relative coordinates between the evader
+% (player a, fixed at the origin facing right) and the pursuer (player b).
 %
 % The relative coordinate dynamics are
 %
-%        \dot x    = -v_a + v_b \cos \psi + a y
-%	 \dot y    = v_b \sin \psi - a x
-%	 \dot \psi = b - a
+%   \dot x    = -v_a + v_b \cos \psi + a y
+%	  \dot y    = v_b \sin \psi - a x
+%	  \dot \psi = b - a
 %
-%   where v_a and v_b are constants, 
-%         input a is trying to avoid the target
-%	  input b is trying to hit the target.
+% where v_a and v_b are constants, input a is trying to avoid the target
+%	input b is trying to hit the target.
 %
 % For more details, see my PhD thesis, section 3.1.
 %
 % This function was originally designed as a script file, so most of the
-%   options can only be modified in the file.
-%
-% For example, edit the file to change the grid dimension, boundary conditions,
-%   aircraft parameters, etc.
+% options can only be modified in the file.  For example, edit the file to
+% change the grid dimension, boundary conditions, aircraft parameters, etc.
 %
 % To get exactly the result from the thesis choose:
 %   targetRadius = 5, velocityA = velocityB = 5, inputA = inputB = +1.
 %
 % It is also possible to modify the file to choose the camera motion
-%   as the reach set grows.
+% as the reach set grows.
 %
-% Parameters:
+% Input Parameters:
 %
-%   filename     The name to give to the animation avi file.
-%   accuracy     Controls the order of approximations.
+%   filename: String.  The name to give to the animation avi file.
+%
+%   accuracy: Controls the order of approximations.  Options are:
 %                  'low'         Use odeCFL1 and upwindFirstFirst.
 %                  'medium'      Use odeCFL2 and upwindFirstENO2 (default).
 %                  'high'        Use odeCFL3 and upwindFirstENO3.
 %                  'veryHigh'    Use odeCFL3 and upwindFirstWENO5.
-%   compress     Boolean specifying whether to use lossy compression to
-%                  (significantly) reduce the file size.  The degree of
-%                  compression can be modified by changing the source code.
 %
-%   data         Implicit surface function at t_max.
-%   g            Grid structure on which data was computed.
-%   data0        Implicit surface function at t_0.
+%   compress: Boolean specifying whether to use lossy compression to
+%   (significantly) reduce the file size.  The degree of compression can be
+%   modified by changing the source code.  Optional.  Default is true.
+%
+% Ouput Parameters:
+%
+%   data: Implicit surface function at t_max.
+%
+%   g: Grid structure on which data was computed.
+%
+%   data0: Implicit surface function at t_0.
 
 % Copyright 2004 Ian M. Mitchell (mitchell@cs.ubc.ca).
 % This software is used, copied and distributed under the licensing 
@@ -72,6 +75,9 @@ function [ data, g, data0 ] = animateAir3D(filename, accuracy, compress)
 %   the distribution.
 %
 % Ian Mitchell, 7/14/04
+% Subversion tags for version control purposes.
+% $Date: 2011-03-29 21:49:03 -0700 (Tue, 29 Mar 2011) $
+% $Id: animateAir3D.m 61 2011-03-30 04:49:03Z mitchell $
 
 %---------------------------------------------------------------------------
 % Make sure we can see the kernel m-files.
@@ -81,6 +87,15 @@ run('../addPathToKernel');
 % You will see many executable lines that are commented out.
 %   These are included to show some of the options available; modify
 %   the commenting to modify the behavior.
+
+% Optional input parameters.
+
+if(nargin < 2)
+  accuracy = 'medium';
+end
+if(nargin < 3)
+  compress = 1;
+end
 
 %---------------------------------------------------------------------------
 % Some animation parameters.
@@ -175,10 +190,6 @@ switch(dissType)
 end
 
 %---------------------------------------------------------------------------
-if(nargin < 1)
-  accuracy = 'medium';
-end
-
 % Set up time approximation scheme.
 integratorOptions = odeCFLset('factorCFL', 0.75, 'stats', 'on');
 
@@ -267,7 +278,7 @@ daspect(aspectRatio);
 camva('manual');
 
 % Create the avi file (choose a smaller qualityValue to get smaller files).
-if((nargin < 3) | compress)
+if compress
   mov = avifile(filename, 'quality', qualityValue);
 else
   mov = avifile(filename, 'compression', 'none');
@@ -326,14 +337,14 @@ endTime = cputime;
 fprintf('Total execution time %g seconds', endTime - startTime);
 
 % We're finished with the movie.
-mov = close(mov);
+mov = close(mov); %#ok<NASGU>
 
 
 
 %---------------------------------------------------------------------------
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %---------------------------------------------------------------------------
-function hamValue = air3DHamFunc(t, data, deriv, schemeData)
+function hamValue = air3DHamFunc(~, ~, deriv, schemeData)
 % air3DHamFunc: analytic Hamiltonian for 3D collision avoidance example.
 %
 % hamValue = air3DHamFunc(t, data, deriv, schemeData)
@@ -386,7 +397,7 @@ hamValue = -(-schemeData.velocityA * deriv{1} ...
 %---------------------------------------------------------------------------
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %---------------------------------------------------------------------------
-function alpha = air3DPartialFunc(t, data, derivMin, derivMax, schemeData, dim)
+function alpha = air3DPartialFunc(~, ~, ~, ~, schemeData, dim)
 % air3DPartialFunc: Hamiltonian partial fcn for 3D collision avoidance example.
 %
 % alpha = air3DPartialFunc(t, data, derivMin, derivMax, schemeData, dim)
