@@ -11,7 +11,7 @@ function mttr = analyticSumSquareTTR(radius, grid)
 %
 % The dynamics are
 %
-%        \dot x    = b_1
+%    \dot x    = b_1
 %	 \dot y    = b_2
 %
 %   where input ||b||_1 \leq 1 is trying to hit the target.
@@ -34,15 +34,15 @@ function mttr = analyticSumSquareTTR(radius, grid)
 % Ian Mitchell, 12/07/04
 
   % Time to reach the origin when input is 1-norm bounded.
-  mttr = abs(gridIn.xs{1}) + abs(gridIn.xs{2});
+  mttr = abs(grid.xs{1}) + abs(grid.xs{2});
 
   % In fact, from most initial states we only have to reach the corners
   %   of the target square.
   mttr = mttr - 2 * radius;
 
   % For states directly in line with the initial square, it is even easier.
-  mttr = chopCorner(mttr, gridIn.xs{1}, gridIn.xs{2}, radius);
-  mttr = chopCorner(mttr, gridIn.xs{2}, gridIn.xs{1}, radius);
+  mttr = chopCorner(mttr, grid.xs{1}, grid.xs{2}, radius);
+  mttr = chopCorner(mttr, grid.xs{2}, grid.xs{1}, radius);
 
   % Finally, make sure we do not have negative time to reach.
   mttr = max(0, mttr);

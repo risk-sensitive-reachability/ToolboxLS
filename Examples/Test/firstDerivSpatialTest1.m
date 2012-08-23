@@ -54,21 +54,19 @@ function [ errorL, errorR, time ] = ...
 %   the distribution.
 %
 % Ian Mitchell, 1/22/04
-% $Date: 2010-08-09 14:38:06 -0700 (Mon, 09 Aug 2010) $
-% $Id: firstDerivSpatialTest1.m 47 2010-08-09 21:38:06Z mitchell $
 
 %---------------------------------------------------------------------------
 % Some options.
 
 % periodic BC?  Note that the analytic derivative calculation assumes periodic.
-periodic = 1;
+periodic = true;
 
 % Is the derivative approximation upwinded?
 schemeName = func2str(scheme);
 if(strncmp('upwind', func2str(scheme), 6))
-  upwinded = 1;
+  upwinded = true;
 else
-  upwinded = 0;
+  upwinded = false;
 end
 
 % A reasonably small number.

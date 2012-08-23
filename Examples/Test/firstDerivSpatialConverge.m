@@ -14,8 +14,6 @@
 % the distribution.
 %
 % Ian Mitchell, 1/25/04
-% $Date: 2010-08-09 14:38:06 -0700 (Mon, 09 Aug 2010) $
-% $Id: firstDerivSpatialConverge.m 47 2010-08-09 21:38:06Z mitchell $
 
 run('../addPathToKernel');
 
@@ -55,9 +53,11 @@ for schemeN = 1 : length(schemes);
   for gridSizeN = 1 : length(gridSizes);
     gridSize = gridSizes(gridSizeN);
     
-    % We'll just look at the leftward error in the upwinded case.
+    % We'll just look at the leftward error in the upwinded case.  It would
+    % be nice to preallocate the errorStats array, but it is painfully
+    % difficult to preallocate an array of structures.
     [ errorStats(gridSizeN), ignored, times(schemeN) ] ...
-        = firstDerivSpatialTest1(scheme, dim, whichDim, 1.0 / gridSize);
+        = firstDerivSpatialTest1(scheme, dim, whichDim, 1.0 / gridSize); %#ok<SAGROW>
   end
   
   % Plot the error statistics.

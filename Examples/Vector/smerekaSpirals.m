@@ -5,66 +5,74 @@ function [ dataCurve, dataMask, g, tPlot ] = ...
 %   [ dataCurve, dataMask, g, tPlot ] = ...
 %                           smerekaSpirals(whichFig, exactCopy, accuracy, tMax)
 %  
-% This function demonstrates use of vector level set methods 
-%   for dynamic implicit open curves by
-%   recreating examples of spiral crystal growth from
-%      Peter Smereka, "Spiral Crystal Growth," 
-%      Physica D 138, pp. 282-301 (2000).
+% This function demonstrates use of vector level set methods for dynamic
+% implicit open curves by recreating examples of spiral crystal growth from
+%
+%      Peter Smereka, "Spiral Crystal Growth," Physica D 138, pp. 282-301
+%      (2000).
+%
+% Note that this function may take a LONG TIME to run because the motion by
+% mean curvature dictates a very small timestep.  In 2007, it took more
+% than 24 hours to complete the co-rotating spirals.
 %
 % The essential idea for open curves is to propagate two implicit surface
-%   functions at once.  One tracks a closed curve and the other a masking
-%   region.  Where the mask function is positive, the curve is considered
-%   real, and where the mask function is negative the curve is a dummy.
-%   The ends of the open real curve lie where the mask function is zero.
+% functions at once.  One tracks a closed curve and the other a masking
+% region.  Where the mask function is positive, the curve is considered
+% real, and where the mask function is negative the curve is a dummy. The
+% ends of the open real curve lie where the mask function is zero.
 %
 % The dynamics for curve motion are essentially motion in the normal
-%   direction plus motion by curvature.
+% direction plus motion by curvature.
 %
 % This function was originally designed as a script file, so most of the
-%   options can only be modified in the file.
+% options can only be modified in the file.
 %
 % For example, edit the file to change the grid dimension, boundary conditions,
-%   flow field parameters, etc.
+% flow field parameters, etc.
 %
-% Parameters (all inputs have defaults):
+% Input Parameters (all inputs have defaults):
 %
-%   whichFig     Number specifying which figure from Smereka's paper
-%                  to recreate.  Default is 4.
+%   whichFig: Number specifying which figure from Smereka's paper to
+%   recreate.  Default is 4.
 %                    4           Counter-rotating spirals, large spacing.
 %                    7           Counter-rotating spirals, small spacing.
 %                    12          Co-rotating spirals.
 %                    17          Single spiral.
-%   exactCopy    Boolean indicating whether Smereka's exact figure
-%                  should be recreated.  If not, use the same parameters
-%                  and initial conditions, but plot equally spaced time
-%                  increments.  Default is 0.
-%   accuracy     Controls the order of approximations.
+%
+%   exactCopy: Boolean indicating whether Smereka's exact figure should be
+%   recreated.  If not, use the same parameters and initial conditions, but
+%   plot equally spaced time increments.  Default is 0.
+%
+%   accuracy: Controls the order of approximations.
 %                  'low'         Use odeCFL1 and upwindFirstFirst.
 %                  'medium'      Use odeCFL2 and upwindFirstENO2 (default).
 %                  'high'        Use odeCFL3 and upwindFirstENO3.
 %                  'veryHigh'    Use odeCFL3 and upwindFirstWENO5.
-%   tMax         Final time.  Data arrays are returned at this time.
-%                  In order to see a full figure recreation, this value
-%                  must be greater than the time of the final corresponding
-%                  subplot from Smereka's paper.  Default is the time
-%                  of the corresponding final subplot.
 %
-%   dataCurve    Implicit surface function for the curve.
-%                  Corresponds to Smereka's \phi(x,t).
-%                Optionally (depending on whether output tPlot is requested)
-%                  returns a cell vector, each element of which is the 
-%                  implicit surface function at a sample time
-%                  corresponding with one element of tPlot.
-%   dataMask     Implicit surface function for the masking set.
-%                  Corresponds to Smereka's \psi(x,t).
-%                Optionally (depending on whether output tPlot is requested)
-%                  returns a cell vector, each element of which is the 
-%                  implicit surface function at a sample time
-%                  corresponding with one element of tPlot.
-%   g            Grid structure on which data was computed.
-%   tPlot        Column vector of sample times at which plots were produced.
-%                  Requesting this output indicates that dataCurve
-%                  and dataMask should return their cell vector versions.
+%   tMax: Final time.  Data arrays are returned at this time. In order to
+%   see a full figure recreation, this value must be greater than the time
+%   of the final corresponding subplot from Smereka's paper.  Default is
+%   the time of the corresponding final subplot.
+%
+% Output parameters:
+%
+%   dataCurve: Implicit surface function for the curve. Corresponds to
+%   Smereka's \phi(x,t). Optionally (depending on whether output tPlot is
+%   requested) returns a cell vector, each element of which is the implicit
+%   surface function at a sample time corresponding with one element of
+%   tPlot.
+%
+%   dataMask: Implicit surface function for the masking set. Corresponds to
+%   Smereka's \psi(x,t). Optionally (depending on whether output tPlot is
+%   requested) returns a cell vector, each element of which is the implicit
+%   surface function at a sample time corresponding with one element of
+%   tPlot.
+%
+%   g: Grid structure on which data was computed.
+%
+%   tPlot: Column vector of sample times at which plots were produced.
+%   Requesting this output indicates that dataCurve and dataMask should
+%   return their cell vector versions.
 
 % Copyright 2005 Ian M. Mitchell (mitchell@cs.ubc.ca).
 % This software is used, copied and distributed under the licensing 
