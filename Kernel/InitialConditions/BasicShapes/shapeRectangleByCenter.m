@@ -3,25 +3,32 @@ function data = shapeRectangleByCenter(grid, center, widths)
 %
 %   data = shapeRectangleByCenter(grid, center, widths)
 %
-% Creates an implicit surface function (close to signed distance) 
-%   for a coordinate axis aligned (hyper)rectangle specified by its
-%   center and widths in each dimension.
+% Creates an implicit surface function (close to signed distance) for a
+% coordinate axis aligned (hyper)rectangle specified by its center and
+% widths in each dimension.
 %
-% Can be used to create intervals and slabs 
-%   by choosing components of the widths as +Inf.
+% Can be used to create intervals and slabs by choosing components of the
+% widths as +Inf.
 %
-% The default parameters for shapeRectangleByCenter and 
-%   shapeRectangleByCorners produce different rectangles.
+% The default parameters for shapeRectangleByCenter and
+% shapeRectangleByCorners produce different rectangles.
 %
-% parameters:
-%   grid	Grid structure (see processGrid.m for details).
-%   center      Vector specifying center of rectangle.  Defaults to zeros.
-%   widths      Vector specifying widths of each side of the rectangle.
-%                 May be a scalar, in which case all dimensions
-%                 have the same width.  Defaults to 1.
+% Input Parameters:
 %
-%   data	Output data array (of size grid.size) containing the
-%                 implicit surface function.
+%   grid: Grid structure (see processGrid.m for details).
+%
+%   center: Vector specifying center of rectangle.  May be a scalar, in
+%   which case the scalar is multiplied by a vector of ones of the
+%   appropriate length.  Defaults to 0 (eg centered at the origin).
+%
+%   widths: Vector specifying (full) widths of each side of the rectangle.
+%   May be a scalar, in which case all dimensions have the same width.
+%   Defaults to 1.
+%
+% Output Parameters:
+%
+%   data: Output data array (of size grid.size) containing the implicit
+%   surface function.
 
 % Copyright 2004 Ian M. Mitchell (mitchell@cs.ubc.ca).
 % This software is used, copied and distributed under the licensing 
@@ -29,17 +36,20 @@ function data = shapeRectangleByCenter(grid, center, widths)
 %   the distribution.
 %
 % Ian Mitchell, 6/23/04
+% $Date: 2009-09-03 16:34:07 -0700 (Thu, 03 Sep 2009) $
+% $Id: shapeRectangleByCenter.m 44 2009-09-03 23:34:07Z mitchell $
 
 %---------------------------------------------------------------------------
 % Default parameter values.
 if(nargin < 2)
   center = zeros(grid.dim, 1);
-end
-if(nargin < 3)
-  widths = 1;
+elseif(numel(center) == 1)
+  center = center * ones(grid.dim, 1);
 end
 
-if(length(widths) == 1)
+if(nargin < 3)
+  widths = ones(grid.dim, 1);
+elseif(numel(widths) == 1)
   widths = widths * ones(grid.dim, 1);
 end
 
@@ -50,6 +60,8 @@ end
 %   the resulting intersection is not quite a signed distance function.
 
 % For the computation, we really want the lower and upper corners.
+lower = zeros(grid.dim, 1);
+upper = zeros(grid.dim, 1);
 for i = 1 : grid.dim
   lower(i) = center(i) - 0.5 * widths(i);
   upper(i) = center(i) + 0.5 * widths(i);

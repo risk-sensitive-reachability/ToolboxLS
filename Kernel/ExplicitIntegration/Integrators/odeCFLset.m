@@ -57,13 +57,14 @@ function options = odeCFLset(varargin)
 %                   called after all postTimestep functions.
 %                 Defaults to [], which calls no function.
 
-% Copyright 2005 Ian M. Mitchell (mitchell@cs.ubc.ca).
+% Copyright 2005-2008 Ian M. Mitchell (mitchell@cs.ubc.ca).
 % This software is used, copied and distributed under the licensing 
 %   agreement contained in the file LICENSE in the top directory of 
 %   the distribution.
 %
-% Ian Mitchell, 2/6/04
-% Modified to add terminalEvent option, Ian Mitchell, 1/30/05
+% Created by Ian Mitchell, 2/6/04
+% $Date: 2010-08-09 21:31:46 -0700 (Mon, 09 Aug 2010) $
+% $Id: odeCFLset.m 50 2010-08-10 04:31:46Z mitchell $
 
   %---------------------------------------------------------------------------
   % No output, no input means caller just wants a list of available options.
@@ -118,11 +119,11 @@ function options = odeCFLset(varargin)
       end
 
      case 'posttimestep'
-      if(isa(value, 'function_handle') | isempty(value))
+      if(isa(value, 'function_handle') || isempty(value))
         options.postTimestep = value;
       elseif(isa(value, 'cell'))
-        for i = 1 : length(value)
-          if(~isa(value{i}, 'function_handle'))
+        for j = 1 : length(value)
+          if(~isa(value{j}, 'function_handle'))
             error([ 'Each element in a postTimestep cell vector must ' ...
                     'be a function handle.' ]);
           end
@@ -148,7 +149,7 @@ function options = odeCFLset(varargin)
       end
 
      case 'terminalevent'
-      if(isa(value, 'function_handle') | isempty(value))
+      if(isa(value, 'function_handle') || isempty(value))
         options.terminalEvent = value;
       else
         error('PostTimestep parameter must be a function handle.');

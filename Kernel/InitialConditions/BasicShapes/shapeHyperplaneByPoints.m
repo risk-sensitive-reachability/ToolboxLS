@@ -45,7 +45,9 @@ function data = shapeHyperplaneByPoints(grid, points, positivePoint)
 %
 % Ian Mitchell, 3/29/05
 % Modified to add positivePoint option, Ian Mitchell 5/26/07
-
+% $Date: 2009-09-03 16:34:07 -0700 (Thu, 03 Sep 2009) $
+% $Id: shapeHyperplaneByPoints.m 44 2009-09-03 23:34:07Z mitchell $
+s
 %---------------------------------------------------------------------------
 % For the positivePoint parameter, what is "too close" to the interface?
 small = 1e3 * eps;

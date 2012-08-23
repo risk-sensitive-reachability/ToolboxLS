@@ -55,7 +55,6 @@ level = 0;
 
 % Across how many grid cells should we reinitialize?
 %   (Choose inf to reinitialize to completion).
-reinitGridCells = inf;
 reinitGridCells = 20;
 
 % What is the convergence criterion?
@@ -74,7 +73,7 @@ end
 
 %---------------------------------------------------------------------------
 % Use periodic boundary conditions (usually causes a larger change)?
-periodic = 1;
+periodic = true;
 
 % Create the grid.
 g.dim = 2;
@@ -151,9 +150,9 @@ end
 %---------------------------------------------------------------------------
 % Reinitialize to signed distance function.
 startTime = cputime;
-data = signedDistanceIterative(g, data, tMax, errorMax, accuracy);
+data = signedDistanceIterative(g, data, accuracy, tMax, errorMax);
 endTime = cputime;
-fprintf('Total execution time %g seconds', endTime - startTime);
+fprintf('\nTotal execution time %g seconds\n', endTime - startTime);
 
 % Show the results
 h = visualizeLevelSet(g, data, displayType, level, [ 't = ' num2str(tMax) ]);

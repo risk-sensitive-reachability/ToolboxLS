@@ -8,15 +8,21 @@ function data = shapeSphere(grid, center, radius)
 %
 % Can be used to create circles in 2D or intervals in 1D.
 %
-% parameters:
-%   grid	Grid structure (see processGrid.m for details).
-%   center      Vector (length grid.dim) specifying point at the center 
-%                 of the sphere (defaults to the origin).
-%   radius	Scalar specifying the radius of the sphere
-%                 (defaults to 1).
 %
-%   data	Output data array (of size grid.size) containing the
-%                 implicit surface function.
+% Input Parameters:
+%
+%   grid: Grid structure (see processGrid.m for details).
+%
+%   center: Vector specifying center of sphere.  May be a scalar, in
+%   which case the scalar is multiplied by a vector of ones of the
+%   appropriate length.  Defaults to 0 (eg centered at the origin).
+%
+%   radius: Scalar specifying the radius of the sphere. Defaults to 1.
+%
+% Output Parameters:
+%
+%   data: Output data array (of size grid.size) containing the implicit
+%   surface function.
 
 % Copyright 2004 Ian M. Mitchell (mitchell@cs.ubc.ca).
 % This software is used, copied and distributed under the licensing 
@@ -24,12 +30,17 @@ function data = shapeSphere(grid, center, radius)
 %   the distribution.
 %
 % Ian Mitchell, 6/23/04
+% $Date: 2009-09-03 16:34:07 -0700 (Thu, 03 Sep 2009) $
+% $Id: shapeSphere.m 44 2009-09-03 23:34:07Z mitchell $
 
 %---------------------------------------------------------------------------
 % Default parameter values.
 if(nargin < 2)
   center = zeros(grid.dim, 1);
+elseif(numel(center) == 1)
+  center = center * ones(grid.dim, 1);
 end
+
 if(nargin < 3)
   radius = 1;
 end

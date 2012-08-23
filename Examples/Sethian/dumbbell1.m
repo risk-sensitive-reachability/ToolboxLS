@@ -192,7 +192,7 @@ while(tMax - tNow > small * tMax)
 end
 
 endTime = cputime;
-fprintf('Total execution time %g seconds', endTime - startTime);
+fprintf('Total execution time %g seconds\n', endTime - startTime);
 
 
 

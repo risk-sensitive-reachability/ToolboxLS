@@ -1,16 +1,17 @@
 % Script file to demonstrate the convergence rate of the first derivative
-%   approximation schemes.
+% approximation schemes.
 %
 % Uses firstDerivSpatialTest1 for a sequence of approximation schemes and
-%   grid sizes.
+% grid sizes.
 %
 % Also demonstrates Matlab's bizarre but useful method of accessing
-%   structure fields by string variables.
+% structure fields by string variables.
 
 % Copyright 2004 Ian M. Mitchell (mitchell@cs.ubc.ca).
+%
 % This software is used, copied and distributed under the licensing 
-%   agreement contained in the file LICENSE in the top directory of 
-%   the distribution.
+% agreement contained in the file LICENSE in the top directory of 
+% the distribution.
 %
 % Ian Mitchell, 1/25/04
 
@@ -52,9 +53,11 @@ for schemeN = 1 : length(schemes);
   for gridSizeN = 1 : length(gridSizes);
     gridSize = gridSizes(gridSizeN);
     
-    % We'll just look at the leftward error in the upwinded case.
+    % We'll just look at the leftward error in the upwinded case.  It would
+    % be nice to preallocate the errorStats array, but it is painfully
+    % difficult to preallocate an array of structures.
     [ errorStats(gridSizeN), ignored, times(schemeN) ] ...
-        = firstDerivSpatialTest1(scheme, dim, whichDim, 1.0 / gridSize);
+        = firstDerivSpatialTest1(scheme, dim, whichDim, 1.0 / gridSize); %#ok<SAGROW>
   end
   
   % Plot the error statistics.

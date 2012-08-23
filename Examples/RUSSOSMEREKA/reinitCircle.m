@@ -33,7 +33,7 @@ function [ data, g, data0 ] = ...
 % Input Parameters:
 %
 %   apply_fix: Boolean.  Should Russo & Smereka's fix be applied?
-%   Optional.  Default = 1.
+%   Optional.  Default = True.
 %
 %   accuracy: String.  Controls the order of approximations away from the
 %   interface.  If the subcell fix is applied, the order of the
@@ -49,7 +49,7 @@ function [ data, g, data0 ] = ...
 %   show_nodes: Boolean.  Plot the location of the grid nodes as well?
 %   The grid is coarse (17 x 17), and plotting the nodes shows clearly
 %   that reinitialization without the subcell fix allows the interface to
-%   move across several nodes.  Optional.  Default = 0.
+%   move across several nodes.  Optional.  Default = False.
 %
 %   grid_anisotropy: Double.  Ratio of horizontal dx to vertical dx.  The
 %   vertical dx is always fixed at 10/16 as in R&S (in higher dimensions,
@@ -90,7 +90,7 @@ run('../addPathToKernel');
 
 %---------------------------------------------------------------------------
 if(nargin < 1)
-  apply_fix = 1;
+  apply_fix = true;
 end
 
 if(nargin < 2)
@@ -98,7 +98,7 @@ if(nargin < 2)
 end
 
 if(nargin < 3)
-  show_nodes = 0;
+  show_nodes = false;
 end
 
 if(nargin < 4)
@@ -192,7 +192,7 @@ integratorOptions = odeCFLset('factorCFL', 0.5, 'singleStep', 'on');
 
 %---------------------------------------------------------------------------
 % Initialize Display
-f = figure;
+figure;
 axis equal;
 axis(g.axis);
 hold on;
@@ -224,7 +224,7 @@ if(any(plot_iter == 0))
     camlight right;
     view(3)
    otherwise
-    warning('Unable to visualize results in dimensions greater than 3.');
+    warning('Unable to visualize results in dimensions greater than 3.'); %#ok<WNTAG>
   end
   drawnow;
 end
@@ -279,4 +279,4 @@ while(iteration < max(plot_iter))
 end
 
 endTime = cputime;
-fprintf('Total execution time %g seconds', endTime - startTime);
+fprintf('\nTotal execution time %g seconds\n', endTime - startTime);

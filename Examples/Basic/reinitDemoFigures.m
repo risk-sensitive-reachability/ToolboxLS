@@ -31,9 +31,9 @@ axis(initial_axis);
 
 % Now a figure to show the effects of reinitialization on the zero contour.
 f3 = figure;
-[ garbage, h_contour_final ] = contour(g.xs{1}, g.xs{2}, data, [ 0 0 ], 'b-');
+[ ~, h_contour_final ] = contour(g.xs{1}, g.xs{2}, data, [ 0 0 ], 'b-');
 hold on;
-[ garbage, h_contour_init ] = contour(g.xs{1}, g.xs{2}, data0, [ 0 0 ], 'r--');
+[ ~, h_contour_init ] = contour(g.xs{1}, g.xs{2}, data0, [ 0 0 ], 'r--');
 axis equal;
 axis(g.axis);
 set(h_contour_final, 'LineWidth', 2);

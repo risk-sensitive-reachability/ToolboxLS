@@ -91,7 +91,7 @@ function [ ydot, stepBound, schemeData ] = termDiscount(t, y, schemeData)
   else
     error('schemeData.lambda must be a scalar, array or function handle');
   end
-
+  
   %---------------------------------------------------------------------------
   % Compute the update (including negation for RHS of ODE).
   delta = lambda .* data;
